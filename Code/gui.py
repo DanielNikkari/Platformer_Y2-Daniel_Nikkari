@@ -1,6 +1,5 @@
-from PyQt5 import (QtWidgets, QtCore, QtGui, Qt)
+from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
 from PyQt5.Qt import Qt
-#from player import Player
 from world_textures import WorldTextures
 import math
 from PyQt5.QtWidgets import QGraphicsPixmapItem
@@ -10,7 +9,7 @@ from PyQt5.QtGui import QPixmap
 FRAME_TIME_MS = 16
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
-SCENE_WIDTH = 3000
+SCENE_WIDTH = 10000
 
 class GUI(QtWidgets.QMainWindow):
     """Class that handles the graphical user interface"""
@@ -26,6 +25,9 @@ class GUI(QtWidgets.QMainWindow):
 
         # Initiate the game window
         self.init_window()
+
+
+
 
 
 
@@ -80,6 +82,16 @@ class GUI(QtWidgets.QMainWindow):
                 background.setPos((0+x*background_size), (0+y*background_size))
                 self.scene.addItem(background)
 
+        self.sun = WorldTextures("sun")
+        scaled_sun_pixmap = self.sun.pixmap().scaled(500, 500, QtCore.Qt.KeepAspectRatio)
+        self.sun.setPixmap(scaled_sun_pixmap)
+        self.sun.setPos(SCENE_WIDTH/2, -200)
+        self.scene.addItem(self.sun)
+
+        school = WorldTextures("school")
+        school.setPos(1000, 100)
+        self.scene.addItem(school)
+
         # Add player item to the scene.
         self.player = Player()
         self.player.setPos((800-self.player.pixmap().width())/2, 568)
@@ -98,6 +110,7 @@ class GUI(QtWidgets.QMainWindow):
             grassCenter = WorldTextures("grassCenterTex")
             grassCenter.setPos((0+x*width_ground), 730)
             self.scene.addItem(grassCenter)
+
 
         #self.ground = QtWidgets.QGraphicsRectItem(0, 0, 800, 200)
         #self.ground.setPos(0, 600)
@@ -136,6 +149,16 @@ class GUI(QtWidgets.QMainWindow):
     def game_update(self):
         # Update the class Player game_update function
         self.player.game_update(self.keys_pressed)
+
+    """def background_music(self):
+        playlist = QtMultimedia.QMediaPlaylist()
+        url = QtCore.QUrl.fromLocalFile("Audio/Music/bg_lofiBeat.mp3")
+        playlist.addMedia(QtMultimedia.QMediaContent(url))
+        playlist.setPlaybackMode(QtMultimedia.QMediaPlaylist.Loop)
+
+        media_player = QtMultimedia.QMediaPlayer()
+        media_player.setPlaylist(playlist)
+        media_player.play()"""
 
 player_speed = 6
 
@@ -179,6 +202,9 @@ class Player(QGraphicsPixmapItem):
         self.duck_time = 15
         self.timer()
 
+        # Initiate media player
+        self.media_player = QtMultimedia.QMediaPlayer()
+
     def timer(self):
         self.timer_player = QtCore.QTimer()
         self.timer_player.start(60)
@@ -201,15 +227,19 @@ class Player(QGraphicsPixmapItem):
             dx -= player_speed
             pic = self.sprite()
             self.setPixmap(pic)
-            #GUI.scroll_view("Left")
+
         if Qt.Key_D in keys_pressed:
             dx += player_speed
             pic = self.sprite()
             self.setPixmap(pic)
-            #GUI.scroll_view("Right")
+
         if Qt.Key_W in keys_pressed:
             # Set the flag for the jump to True.
             self.jumpFlag = True
+            jump_sound_url = QtCore.QUrl.fromLocalFile("Audio/SoundEffects/jump_sound_effect_cut.mp3")
+            self.media_player.setMedia(QtMultimedia.QMediaContent(jump_sound_url))
+            self.media_player.setVolume(50)
+            self.media_player.play()
             # Call for the jumping function.
             self.show_time()
 
@@ -219,6 +249,7 @@ class Player(QGraphicsPixmapItem):
 
         # Update the position of the player in x and y axis.
         self.setPos(self.x()+dx, self.y()+dy)
+
 
     def show_time(self):
         if self.jumpFlag:
