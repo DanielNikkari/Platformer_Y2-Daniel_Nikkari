@@ -4,6 +4,8 @@ from PyQt5.Qt import Qt
 
 class WorldTextures(QGraphicsPixmapItem):
 
+    #Class that holds the textures needed for the platformer world
+
     def __init__(self, texture, parent = None):
         QGraphicsPixmapItem.__init__(self, parent)
         self.grassTextures = {"grassMidTex": QPixmap("Textures/Ground_Textures/grassMid.png"),
