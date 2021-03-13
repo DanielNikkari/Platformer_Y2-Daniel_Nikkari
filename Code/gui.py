@@ -64,6 +64,7 @@ class GUI(QtWidgets.QMainWindow):
         self.scene = QtWidgets.QGraphicsScene()
         self.scene.setSceneRect(0, 0, SCENE_WIDTH, 800)
 
+
         """self.rect = QtWidgets.QGraphicsRectItem(0, 0, 200, 200)
         self.scene.addItem(self.rect)
         self.rect.grabKeyboard()
@@ -111,7 +112,9 @@ class GUI(QtWidgets.QMainWindow):
         #self.view.adjustSize()
         self.view.show()
         self.view.setFixedSize(SCREEN_WIDTH, SCREEN_HEIGHT)
-        self.view.setSceneRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.view.setSceneRect(0, 0, SCENE_WIDTH, SCREEN_HEIGHT)
+        #self.view.centerOn(self.scene.sceneRect().x(), self.scene.sceneRect().y())
+        self.view.centerOn(self.player.x(), self.player.y())
 
 
     def keyPressEvent(self, event):
@@ -128,13 +131,13 @@ class GUI(QtWidgets.QMainWindow):
         # Update the given functions
         self.game_update()
         self.update()
+        self.view.centerOn(self.player.x(), self.player.y())
 
     def game_update(self):
         # Update the class Player game_update function
         self.player.game_update(self.keys_pressed)
 
-
-player_speed = 8
+player_speed = 6
 
 class Player(QGraphicsPixmapItem):
 
@@ -170,8 +173,10 @@ class Player(QGraphicsPixmapItem):
 
         # Initiate needed variables and timer for the jumping
         self.jumpFlag = False
+        self.duckFlag = False
         self.jump_speed = 6
         self.mass = 1
+        self.duck_time = 15
         self.timer()
 
     def timer(self):
@@ -188,42 +193,6 @@ class Player(QGraphicsPixmapItem):
         self.image = self.sprites[self.current_sprite]
         return self.image
 
-
-    """def keyPressEvent(self, event):
-        dx = 0
-        dy = 0
-        if event.key() == Qt.Key_A:
-            #self.setRotation(270)
-            dx -= player_speed
-            pic = self.sprite()
-            self.setPixmap(pic)
-        if event.key() == Qt.Key_D:
-            dx += player_speed
-            pic = self.sprite()
-            self.setPixmap(pic)
-        if event.key() == Qt.Key_W:
-            self.setPixmap(self.jump)
-            y = self.y()
-            force = self.mass * (self.jump_speed**2)
-            y -= force
-            self.setPos(self.x(), y)
-            self.jump_speed = self.jump_speed - 1
-            if self.jump_speed < 0:
-                self.mass = -1
-            if self.jump_speed == -6:
-                self.jump_speed = 5
-                self.mass = 1
-
-            #self.jump = True
-            #self.jump()
-            #self.setPixmap(self.jump)
-        #if event.key() == Qt.Key_S:
-            #dy += player_speed
-        #pic = self.sprite()
-        #self.setPixmap(pic)
-        self.setPos(self.x()+dx, self.y()+dy)"""
-
-
     def game_update(self, keys_pressed):
         # Read the keys pressed and make the player object react to them.
         dx = 0
@@ -232,31 +201,29 @@ class Player(QGraphicsPixmapItem):
             dx -= player_speed
             pic = self.sprite()
             self.setPixmap(pic)
+            #GUI.scroll_view("Left")
         if Qt.Key_D in keys_pressed:
             dx += player_speed
             pic = self.sprite()
             self.setPixmap(pic)
+            #GUI.scroll_view("Right")
         if Qt.Key_W in keys_pressed:
             # Set the flag for the jump to True.
             self.jumpFlag = True
-            # Switch the current pixmap image to jumping image
-            self.setPixmap(self.jump)
             # Call for the jumping function.
             self.show_time()
 
         if Qt.Key_S in keys_pressed:
-            self.setPixmap(self.duck)
+            self.duckFlag = True
+            self.show_time()
 
         # Update the position of the player in x and y axis.
         self.setPos(self.x()+dx, self.y()+dy)
 
-
-    """def keyReleaseEvent(self, event):
-        self.setPixmap(QPixmap("p1_stand.png"))"""
-
     def show_time(self):
         if self.jumpFlag:
-
+            # Switch the current pixmap image to jumping.
+            self.setPixmap(self.jump)
             y = self.y()
 
             # calculate force (F).
@@ -288,6 +255,24 @@ class Player(QGraphicsPixmapItem):
                 # speed  and mass
                 self.jump_speed = 6
                 self.mass = 1
+                # Switch back to stand pixmap image
+                self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
+
+        # Check if the duck Flag is True
+        if self.duckFlag:
+            # Use duck_time as a time indicator, and duck on the 15 and stand up on 0
+            self.setPixmap(self.duck)
+            if self.duck_time == 15:
+                # set position so the player is in duck
+                self.setPos(self.x(), self.y()+20)
+            # Count down time
+            self.duck_time -= 1
+            if self.duck_time == 0:
+                # Reset variables and position
+                self.setPos(self.x(), self.y()-20)
+                self.duckFlag = False
+                self.duck_time = 15
+                self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
 
 
 
