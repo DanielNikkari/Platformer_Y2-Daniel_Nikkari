@@ -14,7 +14,11 @@ SCENE_WIDTH = 10000
 class GUI(QtWidgets.QMainWindow):
     """Class that handles the graphical user interface"""
     def __init__(self):
-        super().__init__()
+        #super().__init__()
+        QtWidgets.QMainWindow.__init__(self)
+
+        # Delete all widgets on close
+        self.setAttribute(Qt.WA_DeleteOnClose)
 
         # Hold the set of keys pressed
         self.keys_pressed = set()
@@ -23,33 +27,121 @@ class GUI(QtWidgets.QMainWindow):
         self.timer = QtCore.QBasicTimer()
         self.timer.start(FRAME_TIME_MS, self)
 
+        # Initiate player
+        self.player = Player()
+
         # Initiate the game window
         self.init_window()
-
-    """def collision(self):
-        collision = False
-        player_pos = (self.player.x(), self.player.y())
-        ground_pos = (self.ground.x(), self.ground.y(), self.ground.x()+800, self.ground.y())
-        print(player_pos, ground_pos)
-        if player_pos[1] >= ground_pos[1]:
-            collision = True
-            return collision"""
+        self.init_scene()
 
     def init_window(self):
         # Initiate a window
-        self.setGeometry(200, 200, 1000, 800)
+        self.setGeometry(200, 200, SCREEN_WIDTH, SCREEN_HEIGHT)
         self.setWindowTitle('Platformer Y2, 653088')
         self.show()
+
+
+    def init_scene(self):
 
         # Initiate a scene to where graphic objects are added
         self.scene = QtWidgets.QGraphicsScene()
         self.scene.setSceneRect(0, 0, SCENE_WIDTH, 800)
 
+        # Call the function for drawing the map and adding the player
+        #self.draw_map()
+        self.display_main_menu()
+
+        # Draw the scene by QGraphicsView
+        self.view = QtWidgets.QGraphicsView(self.scene, self)
+        self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        #self.view.adjustSize()
+        self.view.show()
+        self.view.setFixedSize(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.view.setSceneRect(0, 0, SCENE_WIDTH, SCREEN_HEIGHT)
+        self.view.centerOn(self.player.x(), self.player.y())
+        #self.view.centerOn(self.play_button.x(), self.play_button.y())
+
+    def display_main_menu(self):
         # Draw a background
         background_size = 256
-        bg_tiles = math.ceil(SCENE_WIDTH/background_size)
-        for x in range(bg_tiles):
-            for y in range(bg_tiles):
+        #bg_tiles = math.ceil(SCENE_WIDTH/background_size)
+        bg_tiles_x = math.ceil(SCREEN_WIDTH/background_size)
+        bg_tiles_y = math.ceil(SCREEN_HEIGHT/background_size)
+        for x in range(bg_tiles_x):
+            for y in range(bg_tiles_y):
+                background = WorldTextures("backgroundTex")
+                background.setPos((0+x*background_size), (0+y*background_size))
+                self.scene.addItem(background)
+
+        for g in range(5):
+            self.ghost_menu = WorldTextures("ghost_menu")
+            scaled_ghost_pixmap = self.ghost_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
+            self.ghost_menu.setPixmap(scaled_ghost_pixmap)
+            self.ghost_menu.setPos(-100+(g+1)*200, 680)
+            self.scene.addItem(self.ghost_menu)
+
+        for g in range(5):
+            self.player_menu = WorldTextures("menu_player")
+            scaled_player_pixmap = self.player_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
+            self.player_menu.setPixmap(scaled_player_pixmap)
+            self.player_menu.setPos(-100+(g+1)*200, 10)
+            self.scene.addItem(self.player_menu)
+
+        self.title_text = QtWidgets.QGraphicsTextItem("PLATFORMER Y2\n       653088")
+        self.title_text.setFont(QtGui.QFont("comic sans MS", 50))
+        self.title_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+        self.title_text.setPos((SCREEN_WIDTH/2)-(self.title_text.boundingRect().width()/2), 90)
+        self.scene.addItem(self.title_text)
+
+        self.tut_text = QtWidgets.QGraphicsTextItem("A: lEFT, D: RIGHT\nW: JUMP, S: DUCK")
+        self.tut_text.setFont(QtGui.QFont("comic sans", 20))
+        self.tut_text.setDefaultTextColor(QtGui.QColor(0, 0, 0))
+        self.tut_text.setPos(35, 570)
+        self.scene.addItem(self.tut_text)
+
+        self.wasd = WorldTextures("wasd")
+        scaled_wasd_pixmap = self.wasd.pixmap().scaled(200, 200, QtCore.Qt.KeepAspectRatio)
+        self.wasd.setPixmap(scaled_wasd_pixmap)
+        self.wasd.setPos(75, 400)
+        self.scene.addItem(self.wasd)
+
+        self.start_button = QtWidgets.QPushButton()
+        self.start_button.setGeometry(QtCore.QRect(0, 0, 280, 80))
+        #self.start_button.setText("START GAME")
+        self.start_button.move(SCREEN_WIDTH/2-140, SCREEN_HEIGHT/2-40)
+        self.scene.addWidget(self.start_button)
+        self.start_button.clicked.connect(self.clickMethod)
+
+        self.quit_button = QtWidgets.QPushButton()
+        self.quit_button.setGeometry(QtCore.QRect(0, 0, 280, 80))
+        self.quit_button.move((SCREEN_WIDTH/2)-130, 510)
+        self.scene.addWidget(self.quit_button)
+        self.quit_button.clicked.connect(self.clickMethodQuit)
+
+
+        self.play_button = WorldTextures("start_button")
+        scaled_play_button_pixmap = self.play_button.pixmap().scaled(300, 100, QtCore.Qt.KeepAspectRatio)
+        self.play_button.setPixmap(scaled_play_button_pixmap)
+        self.play_button.setPos((SCREEN_WIDTH/2)-150, 350)
+        self.scene.addItem(self.play_button)
+
+        self.quit_button = WorldTextures("quit_button")
+        scaled_quit_button_pixmap = self.quit_button.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
+        self.quit_button.setPixmap(scaled_quit_button_pixmap)
+        self.quit_button.setPos((SCREEN_WIDTH/2)-150, 500)
+        self.scene.addItem(self.quit_button)
+
+
+
+    def draw_map(self):
+        # Draw a background
+        background_size = 256
+        #bg_tiles = math.ceil(SCENE_WIDTH/background_size)
+        bg_tiles_x = math.ceil(SCENE_WIDTH/background_size)
+        bg_tiles_y = math.ceil(SCREEN_HEIGHT/background_size)
+        for x in range(bg_tiles_x):
+            for y in range(bg_tiles_y):
                 background = WorldTextures("backgroundTex")
                 background.setPos((0+x*background_size), (0+y*background_size))
                 self.scene.addItem(background)
@@ -65,7 +157,6 @@ class GUI(QtWidgets.QMainWindow):
         self.scene.addItem(school)
 
         # Add player item to the scene.
-        self.player = Player()
         self.player.setPos((800-self.player.pixmap().width())/2, 568)
         self.scene.addItem(self.player)
         self.player.grabKeyboard()
@@ -83,25 +174,6 @@ class GUI(QtWidgets.QMainWindow):
             grassCenter.setPos((0+x*width_ground), 730)
             self.scene.addItem(grassCenter)
 
-
-        #self.ground = QtWidgets.QGraphicsRectItem(0, 0, 800, 200)
-        #self.ground.setPos(0, 600)
-        #self.ground.setBrush(QtGui.QColor(20, 20, 20))
-        #self.scene.addItem(self.ground)
-
-        # Draw the scene
-        self.view = QtWidgets.QGraphicsView(self.scene, self)
-        self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        #self.view.translate(1000, 1000)
-        #self.view.adjustSize()
-        self.view.show()
-        self.view.setFixedSize(SCREEN_WIDTH, SCREEN_HEIGHT)
-        self.view.setSceneRect(0, 0, SCENE_WIDTH, SCREEN_HEIGHT)
-        #self.view.centerOn(self.scene.sceneRect().x(), self.scene.sceneRect().y())
-        self.view.centerOn(self.player.x(), self.player.y())
-
-
     def keyPressEvent(self, event):
         # Log the pressed key to keys_pressed
         self.keys_pressed.add(event.key())
@@ -110,18 +182,24 @@ class GUI(QtWidgets.QMainWindow):
     def keyReleaseEvent(self, event):
         # Remove a logged key from the keys_pressed after releasing the key
         self.keys_pressed.remove(event.key())
-        self.player.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
+        #self.player.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
 
     def timerEvent(self, event):
         # Update the given functions
         self.game_update()
         self.update()
+        # Make the view follow the players position
         self.view.centerOn(self.player.x(), self.player.y())
 
     def game_update(self):
         # Update the class Player game_update function
         self.player.game_update(self.keys_pressed)
 
+    def clickMethod(self):
+        self.draw_map()
+
+    def clickMethodQuit(self):
+        QtWidgets.QApplication.quit()
 
 player_speed = 6
 
@@ -157,7 +235,7 @@ class Player(QGraphicsPixmapItem):
         self.current_sprite = 0
         self.image = self.sprites[self.current_sprite]
 
-        # Initiate needed variables and timer for the jumping
+        # Initiate needed variables and timer for the jumping and ducking
         self.jumpFlag = False
         self.duckFlag = False
         self.jump_speed = 6
@@ -175,11 +253,12 @@ class Player(QGraphicsPixmapItem):
 
 
     def sprite(self):
-        # Produce the running animation.
-        self.current_sprite += 1
-        if self.current_sprite >= len(self.sprites):
+        # Produce the running animation using sprite animation.
+        # Slow down the animation by adding only 0.5
+        self.current_sprite += 0.5
+        if int(self.current_sprite) >= len(self.sprites):
             self.current_sprite = 0
-        self.image = self.sprites[self.current_sprite]
+        self.image = self.sprites[int(self.current_sprite)]
         return self.image
 
     def game_update(self, keys_pressed):
@@ -265,12 +344,26 @@ class Player(QGraphicsPixmapItem):
                 self.setPos(self.x(), self.y()+20)
             # Count down time
             self.duck_time -= 1
+
             if self.duck_time == 0:
                 # Reset variables and position
                 self.setPos(self.x(), self.y()-20)
                 self.duckFlag = False
                 self.duck_time = 15
                 self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
+
+"""class Button(QGraphicsPixmapItem):
+
+    def __init__(self, parent = None):
+        QGraphicsPixmapItem.__init__(self, parent)
+        self.start_button = WorldTextures("start_button")
+        self.quit_button = WorldTextures("quit_button")
+
+    def return_start_button(self):
+        return self.start_button
+
+    def return_quit_button(self):
+        return self.quit_button"""
 
 
 
