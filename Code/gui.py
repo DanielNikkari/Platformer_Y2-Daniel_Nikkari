@@ -27,13 +27,17 @@ class GUI(QtWidgets.QMainWindow):
         self.timer = QtCore.QBasicTimer()
         self.timer.start(FRAME_TIME_MS, self)
 
-        # Initiate player
+        # Initiate player and NPCs
         self.player = Player()
         self.ghost = NPC_ghost()
+        self.ghost2 = NPC_ghost()
 
         # Initiate the game window
         self.init_window()
         self.init_scene()
+
+        # Variables
+        self.menuFlag = True
 
     def init_window(self):
         # Initiate a window
@@ -78,15 +82,8 @@ class GUI(QtWidgets.QMainWindow):
         self.ghost_menu = WorldTextures("ghost_menu")
         scaled_ghost_pixmap = self.ghost_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
         self.ghost_menu.setPixmap(scaled_ghost_pixmap)
-        self.ghost_menu.setPos(1000, 680)
+        self.ghost_menu.setPos(500, 680)
         self.scene.addItem(self.ghost_menu)
-
-        """for g in range(5):
-            self.player_menu = WorldTextures("menu_player")
-            scaled_player_pixmap = self.player_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
-            self.player_menu.setPixmap(scaled_player_pixmap)
-            self.player_menu.setPos(-100+(g+1)*200, 10)
-            self.scene.addItem(self.player_menu)"""
 
         self.title_text = QtWidgets.QGraphicsTextItem("PLATFORMER Y2\n       653088")
         self.title_text.setFont(QtGui.QFont("comic sans MS", 50))
@@ -174,9 +171,13 @@ class GUI(QtWidgets.QMainWindow):
             grassCenter.setPos((0+x*width_ground), 730)
             self.scene.addItem(grassCenter)
 
-        #self.ghost = NPC_ghost()
-        self.ghost.setPos(1000, 590)
+        self.ghost.setPos(1000, 580)
         self.scene.addItem(self.ghost)
+        self.ghost.start_pos()
+
+        self.ghost2.setPos(1500, 580)
+        self.scene.addItem(self.ghost2)
+        self.ghost2.start_pos()
 
     def keyPressEvent(self, event):
         # Log the pressed key to keys_pressed
@@ -200,14 +201,11 @@ class GUI(QtWidgets.QMainWindow):
         self.player.game_update(self.keys_pressed)
         self.ghost_menu_movement()
         self.ghost.game_update()
+        self.ghost2.game_update()
 
     def clickMethod(self):
         # Draw the map
         self.draw_map()
-
-    """def ghost_movement(self):
-        if self.ghost.x() > 0:
-            self.ghost.setPos(self.x()-5, self.y())"""
 
     def clickMethodQuit(self):
         # Exit the game
@@ -215,10 +213,22 @@ class GUI(QtWidgets.QMainWindow):
 
 
     def ghost_menu_movement(self):
-        if self.ghost_menu.x() > 0:
+        """if self.ghost_menu.x() > 0:
             self.ghost_menu.setPos(self.ghost_menu.x()-4, self.ghost_menu.y())
         if self.ghost_menu.x() < 3:
-            self.ghost_menu.setPos(1000, self.ghost_menu.y())
+            self.ghost_menu.setPos(1000, self.ghost_menu.y())"""
+        dx = 0
+        if self.menuFlag:
+            dx -= 4
+            self.ghost_menu.setPos(self.ghost_menu.x() + dx, self.ghost_menu.y())
+            if self.ghost_menu.x() < 100:
+                self.menuFlag = False
+
+        if not self.menuFlag:
+            dx += 4
+            self.ghost_menu.setPos(self.ghost_menu.x() + dx, self.ghost_menu.y())
+            if self.ghost_menu.x() > 900:
+                self.menuFlag = True
 
 player_speed = 6
 
@@ -257,7 +267,7 @@ class Player(QGraphicsPixmapItem):
         # Initiate needed variables and timer for the jumping and ducking
         self.jumpFlag = False
         self.duckFlag = False
-        self.jump_speed = 6
+        self.jump_speed = 7
         self.mass = 1
         self.duck_time = 15
         self.timer()
@@ -343,13 +353,13 @@ class Player(QGraphicsPixmapItem):
                 self.mass = -1
 
             # objected reaches its original state
-            if self.jump_speed == -7:
+            if self.jump_speed == -8:
                 # making jump equal to false
                 self.jumpFlag = False
 
                 # setting original values to
                 # speed  and mass
-                self.jump_speed = 6
+                self.jump_speed = 7
                 self.mass = 1
                 # Switch back to stand pixmap image
                 self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
@@ -381,20 +391,23 @@ class NPC_ghost(QGraphicsPixmapItem):
         self.setPixmap(QPixmap("Textures/NPC_Textures/ghost.png"))
         self.setTransformOriginPoint(33, 45)
         self.pointFlag = True
+        self.start_x = 0
+
+    def start_pos(self):
+        self.start_x = self.x()
 
     def game_update(self):
-
         dx = 0
         if self.pointFlag:
             dx -= 3
             self.setPos(self.x() + dx, self.y())
-            if self.x() < 850:
+            if self.x() < (self.start_x - 150):
                 self.pointFlag = False
 
         if not self.pointFlag:
-            dx += 3
+            dx += 5
             self.setPos(self.x() + dx, self.y())
-            if self.x() > 1000:
+            if self.x() > (self.start_x + 150):
                 self.pointFlag = True
 
 
