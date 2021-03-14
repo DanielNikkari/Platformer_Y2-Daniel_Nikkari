@@ -10,7 +10,9 @@ class WorldTextures(QGraphicsPixmapItem):
         QGraphicsPixmapItem.__init__(self, parent)
         self.grassTextures = {"grassMidTex": QPixmap("Textures/Ground_Textures/grassMid.png"),
                               "grassCenterTex": QPixmap("Textures/Ground_Textures/grassCenter.png"),
-                              "backgroundTex": QPixmap("Textures/bg/bg.png")}
+                              "backgroundTex": QPixmap("Textures/bg/bg.png"),
+                              "school": QPixmap("Textures/Background_Textures/School.png"),
+                              "sun": QPixmap("Textures/Background_Textures/sun.png")}
         wanted_texture = self.grassTextures[texture]
         self.setPixmap(wanted_texture)
 

@@ -1,6 +1,5 @@
-from PyQt5 import (QtWidgets, QtCore, QtGui, Qt)
+from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
 from PyQt5.Qt import Qt
-#from player import Player
 from world_textures import WorldTextures
 import math
 from PyQt5.QtWidgets import QGraphicsPixmapItem
@@ -10,7 +9,7 @@ from PyQt5.QtGui import QPixmap
 FRAME_TIME_MS = 16
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
-SCENE_WIDTH = 3000
+SCENE_WIDTH = 10000
 
 class GUI(QtWidgets.QMainWindow):
     """Class that handles the graphical user interface"""
@@ -26,24 +25,6 @@ class GUI(QtWidgets.QMainWindow):
 
         # Initiate the game window
         self.init_window()
-
-
-
-    """def keyPressEvent(self, event):
-        dx = 0
-        dy = 0
-        if event.key() == Qt.Key_A:
-            dx -= 10
-        if event.key() == Qt.Key_D:
-            dx += 10
-        if event.key() == Qt.Key_W:
-            dy -= 10
-        if event.key() == Qt.Key_S:
-            dy += 10
-        print("KEY PRESSED")
-        print(self.x(), self.y())
-        self.rect.setPos(self.rect.x()+dx, self.rect.y()+dy)"""
-
 
     """def collision(self):
         collision = False
@@ -64,13 +45,6 @@ class GUI(QtWidgets.QMainWindow):
         self.scene = QtWidgets.QGraphicsScene()
         self.scene.setSceneRect(0, 0, SCENE_WIDTH, 800)
 
-
-        """self.rect = QtWidgets.QGraphicsRectItem(0, 0, 200, 200)
-        self.scene.addItem(self.rect)
-        self.rect.grabKeyboard()
-        self.rect.setFlag(QtWidgets.QGraphicsItem.ItemIsFocusable)
-        self.rect.setFocus()"""
-
         # Draw a background
         background_size = 256
         bg_tiles = math.ceil(SCENE_WIDTH/background_size)
@@ -79,6 +53,16 @@ class GUI(QtWidgets.QMainWindow):
                 background = WorldTextures("backgroundTex")
                 background.setPos((0+x*background_size), (0+y*background_size))
                 self.scene.addItem(background)
+
+        self.sun = WorldTextures("sun")
+        scaled_sun_pixmap = self.sun.pixmap().scaled(500, 500, QtCore.Qt.KeepAspectRatio)
+        self.sun.setPixmap(scaled_sun_pixmap)
+        self.sun.setPos(SCENE_WIDTH/2, -200)
+        self.scene.addItem(self.sun)
+
+        school = WorldTextures("school")
+        school.setPos(1000, 100)
+        self.scene.addItem(school)
 
         # Add player item to the scene.
         self.player = Player()
@@ -98,6 +82,7 @@ class GUI(QtWidgets.QMainWindow):
             grassCenter = WorldTextures("grassCenterTex")
             grassCenter.setPos((0+x*width_ground), 730)
             self.scene.addItem(grassCenter)
+
 
         #self.ground = QtWidgets.QGraphicsRectItem(0, 0, 800, 200)
         #self.ground.setPos(0, 600)
@@ -136,6 +121,7 @@ class GUI(QtWidgets.QMainWindow):
     def game_update(self):
         # Update the class Player game_update function
         self.player.game_update(self.keys_pressed)
+
 
 player_speed = 6
 
@@ -179,6 +165,9 @@ class Player(QGraphicsPixmapItem):
         self.duck_time = 15
         self.timer()
 
+        # Initiate media player
+        self.media_player = QtMultimedia.QMediaPlayer()
+
     def timer(self):
         self.timer_player = QtCore.QTimer()
         self.timer_player.start(60)
@@ -198,18 +187,26 @@ class Player(QGraphicsPixmapItem):
         dx = 0
         dy = 0
         if Qt.Key_A in keys_pressed:
-            dx -= player_speed
+            # Prevent player walking off the scene by checking the x position of the player is greater than 0
+            if self.x() > 0:
+                dx -= player_speed
             pic = self.sprite()
             self.setPixmap(pic)
-            #GUI.scroll_view("Left")
+
         if Qt.Key_D in keys_pressed:
-            dx += player_speed
+            # Prevent player walking off the screen by checking x position of the player is smaller than scene width
+            if (self.x()+66) < SCENE_WIDTH:  # 66pix is the width of the player png img
+                dx += player_speed
             pic = self.sprite()
             self.setPixmap(pic)
-            #GUI.scroll_view("Right")
+
         if Qt.Key_W in keys_pressed:
             # Set the flag for the jump to True.
             self.jumpFlag = True
+            jump_sound_url = QtCore.QUrl.fromLocalFile("Audio/SoundEffects/jump_sound_effect_cut.mp3")
+            self.media_player.setMedia(QtMultimedia.QMediaContent(jump_sound_url))
+            self.media_player.setVolume(50)
+            self.media_player.play()
             # Call for the jumping function.
             self.show_time()
 
@@ -219,6 +216,7 @@ class Player(QGraphicsPixmapItem):
 
         # Update the position of the player in x and y axis.
         self.setPos(self.x()+dx, self.y()+dy)
+
 
     def show_time(self):
         if self.jumpFlag:
