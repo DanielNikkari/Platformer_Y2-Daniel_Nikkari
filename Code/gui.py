@@ -29,6 +29,7 @@ class GUI(QtWidgets.QMainWindow):
 
         # Initiate player
         self.player = Player()
+        self.ghost = NPC_ghost()
 
         # Initiate the game window
         self.init_window()
@@ -74,19 +75,18 @@ class GUI(QtWidgets.QMainWindow):
                 background.setPos((0+x*background_size), (0+y*background_size))
                 self.scene.addItem(background)
 
-        for g in range(5):
-            self.ghost_menu = WorldTextures("ghost_menu")
-            scaled_ghost_pixmap = self.ghost_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
-            self.ghost_menu.setPixmap(scaled_ghost_pixmap)
-            self.ghost_menu.setPos(-100+(g+1)*200, 680)
-            self.scene.addItem(self.ghost_menu)
+        self.ghost_menu = WorldTextures("ghost_menu")
+        scaled_ghost_pixmap = self.ghost_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
+        self.ghost_menu.setPixmap(scaled_ghost_pixmap)
+        self.ghost_menu.setPos(1000, 680)
+        self.scene.addItem(self.ghost_menu)
 
-        for g in range(5):
+        """for g in range(5):
             self.player_menu = WorldTextures("menu_player")
             scaled_player_pixmap = self.player_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
             self.player_menu.setPixmap(scaled_player_pixmap)
             self.player_menu.setPos(-100+(g+1)*200, 10)
-            self.scene.addItem(self.player_menu)
+            self.scene.addItem(self.player_menu)"""
 
         self.title_text = QtWidgets.QGraphicsTextItem("PLATFORMER Y2\n       653088")
         self.title_text.setFont(QtGui.QFont("comic sans MS", 50))
@@ -174,6 +174,10 @@ class GUI(QtWidgets.QMainWindow):
             grassCenter.setPos((0+x*width_ground), 730)
             self.scene.addItem(grassCenter)
 
+        #self.ghost = NPC_ghost()
+        self.ghost.setPos(1000, 590)
+        self.scene.addItem(self.ghost)
+
     def keyPressEvent(self, event):
         # Log the pressed key to keys_pressed
         self.keys_pressed.add(event.key())
@@ -194,12 +198,27 @@ class GUI(QtWidgets.QMainWindow):
     def game_update(self):
         # Update the class Player game_update function
         self.player.game_update(self.keys_pressed)
+        self.ghost_menu_movement()
+        self.ghost.game_update()
 
     def clickMethod(self):
+        # Draw the map
         self.draw_map()
 
+    """def ghost_movement(self):
+        if self.ghost.x() > 0:
+            self.ghost.setPos(self.x()-5, self.y())"""
+
     def clickMethodQuit(self):
+        # Exit the game
         QtWidgets.QApplication.quit()
+
+
+    def ghost_menu_movement(self):
+        if self.ghost_menu.x() > 0:
+            self.ghost_menu.setPos(self.ghost_menu.x()-4, self.ghost_menu.y())
+        if self.ghost_menu.x() < 3:
+            self.ghost_menu.setPos(1000, self.ghost_menu.y())
 
 player_speed = 6
 
@@ -352,18 +371,31 @@ class Player(QGraphicsPixmapItem):
                 self.duck_time = 15
                 self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
 
-"""class Button(QGraphicsPixmapItem):
+class NPC_ghost(QGraphicsPixmapItem):
 
     def __init__(self, parent = None):
+
+        # Initiate the Pixmap graphics item
         QGraphicsPixmapItem.__init__(self, parent)
-        self.start_button = WorldTextures("start_button")
-        self.quit_button = WorldTextures("quit_button")
+        # Set a png file to the graphics item.
+        self.setPixmap(QPixmap("Textures/NPC_Textures/ghost.png"))
+        self.setTransformOriginPoint(33, 45)
+        self.pointFlag = True
 
-    def return_start_button(self):
-        return self.start_button
+    def game_update(self):
 
-    def return_quit_button(self):
-        return self.quit_button"""
+        dx = 0
+        if self.pointFlag:
+            dx -= 3
+            self.setPos(self.x() + dx, self.y())
+            if self.x() < 850:
+                self.pointFlag = False
+
+        if not self.pointFlag:
+            dx += 3
+            self.setPos(self.x() + dx, self.y())
+            if self.x() > 1000:
+                self.pointFlag = True
 
 
 
