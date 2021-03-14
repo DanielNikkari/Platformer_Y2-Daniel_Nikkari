@@ -12,7 +12,12 @@ class WorldTextures(QGraphicsPixmapItem):
                               "grassCenterTex": QPixmap("Textures/Ground_Textures/grassCenter.png"),
                               "backgroundTex": QPixmap("Textures/bg/bg.png"),
                               "school": QPixmap("Textures/Background_Textures/School.png"),
-                              "sun": QPixmap("Textures/Background_Textures/sun.png")}
+                              "sun": QPixmap("Textures/Background_Textures/sun.png"),
+                              "start_button": QPixmap("Textures/Menu_Textures/start_button.png"),
+                              "quit_button": QPixmap("Textures/Menu_Textures/quit_button.png"),
+                              "wasd": QPixmap("Textures/Menu_Textures/wasd_keys_withoutbg.png"),
+                              "ghost_menu": QPixmap("Textures/NPC_Textures/ghost_normal.png"),
+                              "menu_player": QPixmap("Textures/Menu_Textures/alienGreen.png")}
         wanted_texture = self.grassTextures[texture]
         self.setPixmap(wanted_texture)
 
