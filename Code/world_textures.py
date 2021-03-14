@@ -17,7 +17,8 @@ class WorldTextures(QGraphicsPixmapItem):
                               "quit_button": QPixmap("Textures/Menu_Textures/quit_button.png"),
                               "wasd": QPixmap("Textures/Menu_Textures/wasd_keys_withoutbg.png"),
                               "ghost_menu": QPixmap("Textures/NPC_Textures/ghost_normal.png"),
-                              "menu_player": QPixmap("Textures/Menu_Textures/alienGreen.png")}
+                              "menu_player": QPixmap("Textures/Menu_Textures/alienGreen.png"),
+                              "box": QPixmap("Textures/Obstacle_Textures/box.png")}
         wanted_texture = self.grassTextures[texture]
         self.setPixmap(wanted_texture)
 
