@@ -26,27 +26,6 @@ class GUI(QtWidgets.QMainWindow):
         # Initiate the game window
         self.init_window()
 
-
-
-
-
-
-    """def keyPressEvent(self, event):
-        dx = 0
-        dy = 0
-        if event.key() == Qt.Key_A:
-            dx -= 10
-        if event.key() == Qt.Key_D:
-            dx += 10
-        if event.key() == Qt.Key_W:
-            dy -= 10
-        if event.key() == Qt.Key_S:
-            dy += 10
-        print("KEY PRESSED")
-        print(self.x(), self.y())
-        self.rect.setPos(self.rect.x()+dx, self.rect.y()+dy)"""
-
-
     """def collision(self):
         collision = False
         player_pos = (self.player.x(), self.player.y())
@@ -65,13 +44,6 @@ class GUI(QtWidgets.QMainWindow):
         # Initiate a scene to where graphic objects are added
         self.scene = QtWidgets.QGraphicsScene()
         self.scene.setSceneRect(0, 0, SCENE_WIDTH, 800)
-
-
-        """self.rect = QtWidgets.QGraphicsRectItem(0, 0, 200, 200)
-        self.scene.addItem(self.rect)
-        self.rect.grabKeyboard()
-        self.rect.setFlag(QtWidgets.QGraphicsItem.ItemIsFocusable)
-        self.rect.setFocus()"""
 
         # Draw a background
         background_size = 256
@@ -150,15 +122,6 @@ class GUI(QtWidgets.QMainWindow):
         # Update the class Player game_update function
         self.player.game_update(self.keys_pressed)
 
-    """def background_music(self):
-        playlist = QtMultimedia.QMediaPlaylist()
-        url = QtCore.QUrl.fromLocalFile("Audio/Music/bg_lofiBeat.mp3")
-        playlist.addMedia(QtMultimedia.QMediaContent(url))
-        playlist.setPlaybackMode(QtMultimedia.QMediaPlaylist.Loop)
-
-        media_player = QtMultimedia.QMediaPlayer()
-        media_player.setPlaylist(playlist)
-        media_player.play()"""
 
 player_speed = 6
 
@@ -224,12 +187,16 @@ class Player(QGraphicsPixmapItem):
         dx = 0
         dy = 0
         if Qt.Key_A in keys_pressed:
-            dx -= player_speed
+            # Prevent player walking off the scene by checking the x position of the player is greater than 0
+            if self.x() > 0:
+                dx -= player_speed
             pic = self.sprite()
             self.setPixmap(pic)
 
         if Qt.Key_D in keys_pressed:
-            dx += player_speed
+            # Prevent player walking off the screen by checking x position of the player is smaller than scene width
+            if (self.x()+66) < SCENE_WIDTH:  # 66pix is the width of the player png img
+                dx += player_speed
             pic = self.sprite()
             self.setPixmap(pic)
 
