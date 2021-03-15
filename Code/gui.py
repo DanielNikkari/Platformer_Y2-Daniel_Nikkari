@@ -1,6 +1,7 @@
 from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
 from PyQt5.Qt import Qt
 from world_textures import WorldTextures
+from npc import NPC
 import math
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
@@ -34,10 +35,14 @@ class GUI(QtWidgets.QMainWindow):
         self.ghost2 = NPC_ghost()
         self.ghost_menu = WorldTextures("ghost_menu")"""
 
-        # Initiate the game window
+        # Initiate the game window, player and NPCs
         self.init_player_and_NPCs()
         self.init_window()
         self.init_scene()
+
+        # Initiate media player and click sound effect location
+        self.media_player = QtMultimedia.QMediaPlayer()
+        self.click_sound_url = QtCore.QUrl.fromLocalFile("Audio/SoundEffects/click_sound_effect.mp3")
 
         # Variables
         self.menuFlag = True
@@ -53,8 +58,10 @@ class GUI(QtWidgets.QMainWindow):
     def init_player_and_NPCs(self):
         # Initiate player and NPCs
         self.player = Player()
-        self.ghost = NPC_ghost()
-        self.ghost2 = NPC_ghost()
+        #self.ghost = NPC_ghost()
+        #self.ghost2 = NPC_ghost()
+        self.ghost = NPC("ghost")
+        self.ghost2 = NPC("ghost")
         self.ghost_menu = WorldTextures("ghost_menu")
 
 
@@ -147,8 +154,6 @@ class GUI(QtWidgets.QMainWindow):
         self.quit_button.setPos((SCREEN_WIDTH/2)-150, 500)
         self.scene.addItem(self.quit_button)
 
-
-
     def draw_map(self):
         # Draw a background
         background_size = 256
@@ -231,8 +236,8 @@ class GUI(QtWidgets.QMainWindow):
         self.checkColliding()
         # Update some NPC functions
         self.ghost_menu_movement()
-        self.ghost.game_update()
-        self.ghost2.game_update()
+        self.ghost.game_update_ghost()
+        self.ghost2.game_update_ghost()
         #self.pause_game()
 
     def checkColliding(self):
@@ -256,8 +261,6 @@ class GUI(QtWidgets.QMainWindow):
                 print("COLLISION WITH box2")
                 self.collision = True
 
-            #print(QtWidgets.QGraphicsItem.collidingItems(self.player))
-            #print(self.ghost)
         if self.death:
             # Add game over text
             self.title_text = QtWidgets.QGraphicsTextItem("GAME OVER")
@@ -288,20 +291,32 @@ class GUI(QtWidgets.QMainWindow):
             self.timer.stop()
 
     def clickMethodRestart(self):
+        # PLay click sound effect
+        self.media_player.setMedia(QtMultimedia.QMediaContent(self.click_sound_url))
+        self.media_player.setVolume(30)
+        self.media_player.play()
         self.death = False
-        self.scene.clear()
+        #self.scene.clear()
         self.init_player_and_NPCs()
         self.draw_map()
         self.timer.start(FRAME_TIME_MS, self)
 
     def clickMethodBackMenu(self):
+        # PLay click sound effect
+        self.media_player.setMedia(QtMultimedia.QMediaContent(self.click_sound_url))
+        self.media_player.setVolume(30)
+        self.media_player.play()
         self.death = False
-        self.scene.clear()
+        #self.scene.clear()
         self.init_player_and_NPCs()
         self.display_main_menu()
         self.timer.start(FRAME_TIME_MS, self)
 
     def clickMethod(self):
+        # PLay click sound effect
+        self.media_player.setMedia(QtMultimedia.QMediaContent(self.click_sound_url))
+        self.media_player.setVolume(30)
+        self.media_player.play()
         # Draw the map
         self.draw_map()
 
@@ -312,10 +327,6 @@ class GUI(QtWidgets.QMainWindow):
 
     def ghost_menu_movement(self):
         # Algo for the menu ghost to move
-        """if self.ghost_menu.x() > 0:
-            self.ghost_menu.setPos(self.ghost_menu.x()-4, self.ghost_menu.y())
-        if self.ghost_menu.x() < 3:
-            self.ghost_menu.setPos(1000, self.ghost_menu.y())"""
         dx = 0
         if self.menuFlag:
             dx -= 4
@@ -434,6 +445,11 @@ class Player(QGraphicsPixmapItem):
         self.setPixmap(self.hurt)
         self.hurtFlag = True
         self.setPos(self.x(), self.y()+20)
+        # Play death sound effect
+        death_sound_url = QtCore.QUrl.fromLocalFile("Audio/SoundEffects/death_sound_effect.mp3")
+        self.media_player.setMedia(QtMultimedia.QMediaContent(death_sound_url))
+        self.media_player.setVolume(35)
+        self.media_player.play()
 
 
     def show_time(self):
@@ -491,7 +507,7 @@ class Player(QGraphicsPixmapItem):
                 self.duck_time = 15
                 self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
 
-class NPC_ghost(QGraphicsPixmapItem):
+"""class NPC_ghost(QGraphicsPixmapItem):
 
     # NPC ghost class that initiates ghost graphics and processes movement algorithm.
 
@@ -522,7 +538,7 @@ class NPC_ghost(QGraphicsPixmapItem):
             dx += 5
             self.setPos(self.x() + dx, self.y())
             if self.x() > (self.start_x + 150):
-                self.pointFlag = True
+                self.pointFlag = True"""
 
 
 

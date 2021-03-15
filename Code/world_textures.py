@@ -8,7 +8,8 @@ class WorldTextures(QGraphicsPixmapItem):
 
     def __init__(self, texture, parent = None):
         QGraphicsPixmapItem.__init__(self, parent)
-        self.grassTextures = {"grassMidTex": QPixmap("Textures/Ground_Textures/grassMid.png"),
+        # Create a dictionary which holds different world textures
+        self.worldTextures = {"grassMidTex": QPixmap("Textures/Ground_Textures/grassMid.png"),
                               "grassCenterTex": QPixmap("Textures/Ground_Textures/grassCenter.png"),
                               "backgroundTex": QPixmap("Textures/bg/bg.png"),
                               "school": QPixmap("Textures/Background_Textures/School.png"),
@@ -19,7 +20,8 @@ class WorldTextures(QGraphicsPixmapItem):
                               "ghost_menu": QPixmap("Textures/NPC_Textures/ghost_normal.png"),
                               "menu_player": QPixmap("Textures/Menu_Textures/alienGreen.png"),
                               "box": QPixmap("Textures/Obstacle_Textures/box.png")}
-        wanted_texture = self.grassTextures[texture]
+        # Pick the wanted texture from the dictionary
+        wanted_texture = self.worldTextures[texture]
         self.setPixmap(wanted_texture)
 
 
