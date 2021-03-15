@@ -29,14 +29,30 @@ class GUI(QtWidgets.QMainWindow):
         self.timer = QtCore.QBasicTimer()
         self.timer.start(FRAME_TIME_MS, self)
 
-        """# Initiate player and NPCs
+        # Initiate player and NPCs
+        # Initiate player and NPCs
         self.player = Player()
-        self.ghost = NPC_ghost()
-        self.ghost2 = NPC_ghost()
-        self.ghost_menu = WorldTextures("ghost_menu")"""
+        #self.ghost = NPC_ghost()
+        #self.ghost2 = NPC_ghost()
+        self.ghost = NPC("ghost")
+        self.ghost2 = NPC("ghost")
+        self.ghost_menu = WorldTextures("ghost_menu")
+        self.bee1 = NPC("bee")
+        self.frog1 = NPC("frog")
+
+        # Init world textures
+        self.background1 = WorldTextures("backgroundTex")
+        self.title_text = QtWidgets.QGraphicsTextItem("PLATFORMER Y2\n       653088")
+        self.tut_text = QtWidgets.QGraphicsTextItem("A: lEFT   D: RIGHT\nW: JUMP S: DUCK")
+        self.wasd = WorldTextures("wasd")
+        self.start_button = QtWidgets.QPushButton()
+        self.quit_button = QtWidgets.QPushButton()
+        self.play_button = WorldTextures("start_button")
+        self.quit_button_tex = WorldTextures("quit_button")
+
 
         # Initiate the game window, player and NPCs
-        self.init_player_and_NPCs()
+        #self.init_player_and_NPCs()
         self.init_window()
         self.init_scene()
 
@@ -47,7 +63,8 @@ class GUI(QtWidgets.QMainWindow):
         # Variables
         self.menuFlag = True
         self.death = False
-        self.collision = False
+        self.collision_x = None
+        self.collision_y = None
 
     def init_window(self):
         # Initiate a window
@@ -66,6 +83,17 @@ class GUI(QtWidgets.QMainWindow):
         self.ghost_menu = WorldTextures("ghost_menu")
         self.bee1 = NPC("bee")
         self.frog1 = NPC("frog")
+
+    """def init_world_items(self):
+        self.background1 = WorldTextures("backgroundTex")
+        self.title_text = QtWidgets.QGraphicsTextItem("PLATFORMER Y2\n       653088")
+        self.tut_text = QtWidgets.QGraphicsTextItem("A: lEFT   D: RIGHT\nW: JUMP S: DUCK")
+        self.wasd = WorldTextures("wasd")
+        self.start_button = QtWidgets.QPushButton()
+        self.play_button = WorldTextures("start_button")
+        self.quit_button = QtWidgets.QPushButton()
+        self.quit_button_tex = WorldTextures("quit_button")"""
+
 
     def init_scene(self):
 
@@ -96,12 +124,12 @@ class GUI(QtWidgets.QMainWindow):
         bg_tiles_y = math.ceil(SCREEN_HEIGHT/background_size)
         for x in range(bg_tiles_x):
             for y in range(bg_tiles_y):
-                background = WorldTextures("backgroundTex")
-                background.setPos((0+x*background_size), (0+y*background_size))
-                self.scene.addItem(background)
+                self.background1 = WorldTextures("backgroundTex")
+                self.background1.setPos((0+x*background_size), (0+y*background_size))
+                self.scene.addItem(self.background1)
 
         # Add a ghost NPC on the menu
-        #self.ghost_menu = WorldTextures("ghost_menu")
+        self.ghost_menu = WorldTextures("ghost_menu")
         scaled_ghost_pixmap = self.ghost_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
         self.ghost_menu.setPixmap(scaled_ghost_pixmap)
         self.ghost_menu.setPos(500, 680)
@@ -150,11 +178,11 @@ class GUI(QtWidgets.QMainWindow):
         self.scene.addItem(self.play_button)
 
         # Add texture for the quit push button (just adds PNG over the push button)
-        self.quit_button = WorldTextures("quit_button")
-        scaled_quit_button_pixmap = self.quit_button.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
-        self.quit_button.setPixmap(scaled_quit_button_pixmap)
-        self.quit_button.setPos((SCREEN_WIDTH/2)-150, 500)
-        self.scene.addItem(self.quit_button)
+        self.quit_button_tex = WorldTextures("quit_button")
+        scaled_quit_button_pixmap = self.quit_button_tex.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
+        self.quit_button_tex.setPixmap(scaled_quit_button_pixmap)
+        self.quit_button_tex.setPos((SCREEN_WIDTH/2)-150, 500)
+        self.scene.addItem(self.quit_button_tex)
 
     def draw_map(self):
         # Draw a background
@@ -164,9 +192,9 @@ class GUI(QtWidgets.QMainWindow):
         bg_tiles_y = math.ceil(SCREEN_HEIGHT/background_size)
         for x in range(bg_tiles_x):
             for y in range(bg_tiles_y):
-                background = WorldTextures("backgroundTex")
-                background.setPos((0+x*background_size), (0+y*background_size))
-                self.scene.addItem(background)
+                self.background1 = WorldTextures("backgroundTex")
+                self.background1.setPos((0+x*background_size), (0+y*background_size))
+                self.scene.addItem(self.background1)
 
         # Add a sun texture on the map
         self.sun = WorldTextures("sun")
@@ -192,10 +220,10 @@ class GUI(QtWidgets.QMainWindow):
 
         # Add obstacles
         self.box1 = WorldTextures("box")
-        self.box1.setPos(2000, 660-BOX_DIM)
+        self.box1.setPos(500, 660-BOX_DIM)
         self.scene.addItem(self.box1)
         self.box2 = WorldTextures("box")
-        self.box2.setPos(2000, 660-2*BOX_DIM)
+        self.box2.setPos(500, 660-2*BOX_DIM)
         self.scene.addItem(self.box2)
 
         # Add NPC ghost 1
@@ -244,7 +272,7 @@ class GUI(QtWidgets.QMainWindow):
 
     def game_update(self):
         # Update the class Player game_update function
-        self.player.game_update(self.keys_pressed, self.collision)
+        self.player.game_update(self.keys_pressed, self.collision_x, self.collision_y)
         self.checkColliding()
         # Update some NPC functions
         self.ghost_menu_movement()
@@ -285,10 +313,34 @@ class GUI(QtWidgets.QMainWindow):
 
             if self.box1 in QtWidgets.QGraphicsItem.collidingItems(self.player):
                 print("COLLISION WITH box1")
-                self.collision = True
+                #self.collision = True
+                distance = self.getDistance(self.player.x()+self.player.boundingRect().width()/2,
+                                            self.player.y()+self.player.boundingRect().height()/2,
+                                            self.box1.x()+self.box1.boundingRect().width()/2,
+                                            self.box1.y()+self.box1.boundingRect().height()/2)
+                print(distance[2])
+                if distance[2] < 142:
+                    if distance[0] > 0:
+                        self.collision_x = "R"
+                    if distance[0] < 0:
+                        self.collision_x = "L"
+                if distance[2] < 167:
+                    if distance[1] > 0:
+                        self.collision_y = "U"
+                    if distance[1] < 0:
+                        self.collision_y = "D"
+
             if self.box2 in QtWidgets.QGraphicsItem.collidingItems(self.player):
                 print("COLLISION WITH box2")
-                self.collision = True
+                #self.collision = True
+
+            if self.box1 not in QtWidgets.QGraphicsItem.collidingItems(self.player):
+                self.collision_x = None
+                self.collision_y = None
+            if self.box2 not in QtWidgets.QGraphicsItem.collidingItems(self.player):
+                self.collision_x = None
+                self.collision_y = None
+
 
         if self.death:
             # Add game over text
@@ -314,6 +366,10 @@ class GUI(QtWidgets.QMainWindow):
             self.scene.addWidget(self.backMenu)
             self.backMenu.clicked.connect(self.clickMethodBackMenu)
 
+    def getDistance(self, x1, y1, x2, y2):
+        xDistance = x2 - x1
+        yDistance = y2 - y1
+        return xDistance, yDistance, math.sqrt(math.pow(xDistance, 2) + math.pow(yDistance, 2))
 
     def pause_game(self):
         if self.timer.isActive():
@@ -417,6 +473,7 @@ class Player(QGraphicsPixmapItem):
 
         # Initiate media player
         self.media_player = QtMultimedia.QMediaPlayer()
+        self.count = 0
 
 
     def timer(self):
@@ -434,21 +491,21 @@ class Player(QGraphicsPixmapItem):
         self.image = self.sprites[int(self.current_sprite)]
         return self.image
 
-    def game_update(self, keys_pressed, collision):
+    def game_update(self, keys_pressed, collision_x, collision_y):
         # Read the keys pressed and make the player object react to them.
-        print(collision)
+        # self.c_y = collision_y
         dx = 0
         dy = 0
         if Qt.Key_A in keys_pressed:
             # Prevent player walking off the scene by checking the x position of the player is greater than 0
-            if self.x() > 0:
+            if self.x() > 0 and collision_x != "L":
                 dx -= player_speed
             pic = self.sprite()
             self.setPixmap(pic)
 
         if Qt.Key_D in keys_pressed:
             # Prevent player walking off the screen by checking x position of the player is smaller than scene width
-            if (self.x()+66) < SCENE_WIDTH:  # 66pix is the width of the player png img
+            if (self.x()+66) < SCENE_WIDTH and collision_x != "R":  # 66pix is the width of the player png img
                 dx += player_speed
             pic = self.sprite()
             self.setPixmap(pic)
@@ -480,7 +537,6 @@ class Player(QGraphicsPixmapItem):
         self.media_player.setVolume(35)
         self.media_player.play()
 
-
     def show_time(self):
         if self.jumpFlag:
             # Switch the current pixmap image to jumping.
@@ -494,12 +550,22 @@ class Player(QGraphicsPixmapItem):
 
             # change in the y co-ordinate
             y -= Force
-
             self.setPos(self.x(), y)
 
             # decreasing velocity while going up
             # and become negative while coming down
             self.jump_speed = self.jump_speed - 1
+
+            """if self.c_y == "U":
+                # making jump equal to false
+                self.jumpFlag = False
+
+                # setting original values to
+                # speed  and mass
+                self.jump_speed = 6
+                self.mass = 1
+                # Switch back to stand pixmap image
+                self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))"""
 
             # object reached its maximum height
             if self.jump_speed < 0:
