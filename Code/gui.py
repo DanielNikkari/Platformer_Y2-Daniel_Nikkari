@@ -51,6 +51,7 @@ class GUI(QtWidgets.QMainWindow):
 
     def init_window(self):
         # Initiate a window
+        #self.setStyleSheet("background-color: blue")
         self.setGeometry(200, 200, SCREEN_WIDTH, SCREEN_HEIGHT)
         self.setWindowTitle('Platformer Y2, 653088')
         self.show()
@@ -63,7 +64,8 @@ class GUI(QtWidgets.QMainWindow):
         self.ghost = NPC("ghost")
         self.ghost2 = NPC("ghost")
         self.ghost_menu = WorldTextures("ghost_menu")
-
+        self.bee1 = NPC("bee")
+        self.frog1 = NPC("frog")
 
     def init_scene(self):
 
@@ -181,12 +183,12 @@ class GUI(QtWidgets.QMainWindow):
         # Add ground textures to the scene
         grassTiles = math.ceil(SCENE_WIDTH/BOX_DIM)
         for x in range(grassTiles):
-            grassMid = WorldTextures("grassMidTex")
-            grassMid.setPos((0+x*BOX_DIM), 660)
-            self.scene.addItem(grassMid)
-            grassCenter = WorldTextures("grassCenterTex")
-            grassCenter.setPos((0+x*BOX_DIM), 730)
-            self.scene.addItem(grassCenter)
+            self.grassMid = WorldTextures("grassMidTex")
+            self.grassMid.setPos((0+x*BOX_DIM), 660)
+            self.scene.addItem(self.grassMid)
+            self.grassCenter = WorldTextures("grassCenterTex")
+            self.grassCenter.setPos((0+x*BOX_DIM), 730)
+            self.scene.addItem(self.grassCenter)
 
         # Add obstacles
         self.box1 = WorldTextures("box")
@@ -197,14 +199,24 @@ class GUI(QtWidgets.QMainWindow):
         self.scene.addItem(self.box2)
 
         # Add NPC ghost 1
-        self.ghost.setPos(1000, 580)
+        self.ghost.setPos(1000, 585)
         self.scene.addItem(self.ghost)
         self.ghost.start_pos()
 
         # Add NPC ghost 2
-        self.ghost2.setPos(1500, 580)
+        self.ghost2.setPos(1500, 585)
         self.scene.addItem(self.ghost2)
         self.ghost2.start_pos()
+
+        # Add NPC bee
+        self.bee1.setPos(1700, 510)
+        self.scene.addItem(self.bee1)
+        self.bee1.start_pos()
+
+        # Add NPC frog
+        self.frog1.setPos(600, 621)
+        self.scene.addItem(self.frog1)
+        self.frog1.start_pos()
 
         # Add player item to the scene.
         self.player.setPos((800-self.player.pixmap().width())/2, 568)
@@ -238,7 +250,8 @@ class GUI(QtWidgets.QMainWindow):
         self.ghost_menu_movement()
         self.ghost.game_update_ghost()
         self.ghost2.game_update_ghost()
-        #self.pause_game()
+        self.bee1.game_update_bee()
+        self.frog1.game_update_frog()
 
     def checkColliding(self):
         if QtWidgets.QGraphicsItem.collidingItems(self.player):
@@ -253,6 +266,22 @@ class GUI(QtWidgets.QMainWindow):
                 self.player.player_death()
                 self.death = True
                 self.pause_game()
+
+            if self.bee1 in QtWidgets.QGraphicsItem.collidingItems(self.player):
+                print("COLLISION WITH bee 1")
+                self.player.player_death()
+                self.death = True
+                self.pause_game()
+
+            if self.frog1 in QtWidgets.QGraphicsItem.collidingItems(self.player):
+                print("COLLISION WITH frog 1")
+                if self.player.y() < self.frog1.y()-52:
+                    print(self.player.y(), self.frog1.y())
+                    self.frog1.frog_deadFunc()
+                else:
+                    self.player.player_death()
+                    self.death = True
+                    self.pause_game()
 
             if self.box1 in QtWidgets.QGraphicsItem.collidingItems(self.player):
                 print("COLLISION WITH box1")
@@ -380,7 +409,7 @@ class Player(QGraphicsPixmapItem):
         # Initiate needed variables and timer for the jumping and ducking and in case of death
         self.jumpFlag = False
         self.duckFlag = False
-        self.jump_speed = 7
+        self.jump_speed = 6
         self.mass = 1
         self.duck_time = 15
         self.timer()
@@ -479,13 +508,13 @@ class Player(QGraphicsPixmapItem):
                 self.mass = -1
 
             # objected reaches its original state
-            if self.jump_speed == -8:
+            if self.jump_speed == -7:
                 # making jump equal to false
                 self.jumpFlag = False
 
                 # setting original values to
                 # speed  and mass
-                self.jump_speed = 7
+                self.jump_speed = 6
                 self.mass = 1
                 # Switch back to stand pixmap image
                 self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
