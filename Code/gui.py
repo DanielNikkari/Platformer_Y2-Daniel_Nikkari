@@ -28,12 +28,14 @@ class GUI(QtWidgets.QMainWindow):
         self.timer = QtCore.QBasicTimer()
         self.timer.start(FRAME_TIME_MS, self)
 
-        # Initiate player and NPCs
+        """# Initiate player and NPCs
         self.player = Player()
         self.ghost = NPC_ghost()
         self.ghost2 = NPC_ghost()
+        self.ghost_menu = WorldTextures("ghost_menu")"""
 
         # Initiate the game window
+        self.init_player_and_NPCs()
         self.init_window()
         self.init_scene()
 
@@ -47,6 +49,13 @@ class GUI(QtWidgets.QMainWindow):
         self.setGeometry(200, 200, SCREEN_WIDTH, SCREEN_HEIGHT)
         self.setWindowTitle('Platformer Y2, 653088')
         self.show()
+
+    def init_player_and_NPCs(self):
+        # Initiate player and NPCs
+        self.player = Player()
+        self.ghost = NPC_ghost()
+        self.ghost2 = NPC_ghost()
+        self.ghost_menu = WorldTextures("ghost_menu")
 
 
     def init_scene(self):
@@ -83,7 +92,7 @@ class GUI(QtWidgets.QMainWindow):
                 self.scene.addItem(background)
 
         # Add a ghost NPC on the menu
-        self.ghost_menu = WorldTextures("ghost_menu")
+        #self.ghost_menu = WorldTextures("ghost_menu")
         scaled_ghost_pixmap = self.ghost_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
         self.ghost_menu.setPixmap(scaled_ghost_pixmap)
         self.ghost_menu.setPos(500, 680)
@@ -257,24 +266,40 @@ class GUI(QtWidgets.QMainWindow):
             self.title_text.setPos(self.player.x()-250, self.player.y()-300)
             self.scene.addItem(self.title_text)
 
-            """# Add a push button that will be used to restart the map
+            # Add a push button that will be used to restart the map
             self.restart = QtWidgets.QPushButton()
             self.restart.setGeometry(QtCore.QRect(0, 0, 280, 80))
             self.restart.setText("RESTART")
             self.restart.move(self.player.x()-140, self.player.y()-100)
             self.scene.addWidget(self.restart)
-            self.restart.clicked.connect(self.clickMethodRestart)"""
+            self.restart.clicked.connect(self.clickMethodRestart)
+
+            # Add a push button that will be used to go back to main menu
+            self.backMenu = QtWidgets.QPushButton()
+            self.backMenu.setGeometry(QtCore.QRect(0, 0, 280, 80))
+            self.backMenu.setText("BACK TO MENU")
+            self.backMenu.move(self.player.x()-140, self.player.y()+50)
+            self.scene.addWidget(self.backMenu)
+            self.backMenu.clicked.connect(self.clickMethodBackMenu)
 
 
     def pause_game(self):
         if self.timer.isActive():
             self.timer.stop()
 
-    """def clickMethodRestart(self):
+    def clickMethodRestart(self):
         self.death = False
         self.scene.clear()
+        self.init_player_and_NPCs()
+        self.draw_map()
+        self.timer.start(FRAME_TIME_MS, self)
+
+    def clickMethodBackMenu(self):
+        self.death = False
+        self.scene.clear()
+        self.init_player_and_NPCs()
         self.display_main_menu()
-        self.timer.start(FRAME_TIME_MS, self)"""
+        self.timer.start(FRAME_TIME_MS, self)
 
     def clickMethod(self):
         # Draw the map
