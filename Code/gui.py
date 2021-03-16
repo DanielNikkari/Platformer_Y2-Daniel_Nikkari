@@ -10,8 +10,9 @@ from PyQt5.QtGui import QPixmap
 FRAME_TIME_MS = 16
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
-SCENE_WIDTH = 10000
+SCENE_WIDTH = 5000
 BOX_DIM = 70
+GROUND_LEVEL = 660
 
 class GUI(QtWidgets.QMainWindow):
     """Class that handles the graphical user interface"""
@@ -30,15 +31,18 @@ class GUI(QtWidgets.QMainWindow):
         self.timer.start(FRAME_TIME_MS, self)
 
         # Initiate player and NPCs
-        # Initiate player and NPCs
         self.player = Player()
-        #self.ghost = NPC_ghost()
-        #self.ghost2 = NPC_ghost()
         self.ghost = NPC("ghost")
         self.ghost2 = NPC("ghost")
         self.ghost_menu = WorldTextures("ghost_menu")
         self.bee1 = NPC("bee")
+        self.bee2 = NPC("bee")
         self.frog1 = NPC("frog")
+
+        # Initiate clouds
+        self.cloud1 = WorldTextures("cloud1")
+        self.cloud2 = WorldTextures("cloud2")
+        self.cloud3, self.cloud4 = WorldTextures("cloud1"), WorldTextures("cloud2")
 
         # Init world textures
         self.background1 = WorldTextures("backgroundTex")
@@ -82,6 +86,7 @@ class GUI(QtWidgets.QMainWindow):
         self.ghost2 = NPC("ghost")
         self.ghost_menu = WorldTextures("ghost_menu")
         self.bee1 = NPC("bee")
+        self.bee2 = NPC("bee")
         self.frog1 = NPC("frog")
 
     """def init_world_items(self):
@@ -203,10 +208,23 @@ class GUI(QtWidgets.QMainWindow):
         self.sun.setPos(SCENE_WIDTH/2, -200)
         self.scene.addItem(self.sun)
 
-        # Add a school texture on the map
+        # Add background objects
+        self.cloud1 = WorldTextures("cloud1")
+        self.cloud1.setPos(500, 150)
+        self.scene.addItem(self.cloud1)
+        self.cloud2 = WorldTextures("cloud2")
+        self.cloud2.setPos(200, 250)
+        self.scene.addItem(self.cloud2)
+        self.cloud3, self.cloud4 = WorldTextures("cloud1"), WorldTextures("cloud2")
+        self.cloud3.setPos(1500, 200)
+        self.cloud4.setPos(2500, 300)
+        self.scene.addItem(self.cloud3)
+        self.scene.addItem(self.cloud4)
+
+        """# Add a school texture on the map
         school = WorldTextures("school")
         school.setPos(1000, 100)
-        self.scene.addItem(school)
+        self.scene.addItem(school)"""
 
         # Add ground textures to the scene
         grassTiles = math.ceil(SCENE_WIDTH/BOX_DIM)
@@ -227,22 +245,27 @@ class GUI(QtWidgets.QMainWindow):
         self.scene.addItem(self.box2)
 
         # Add NPC ghost 1
-        self.ghost.setPos(1000, 585)
+        self.ghost.setPos(1000, 590)
         self.scene.addItem(self.ghost)
         self.ghost.start_pos()
 
         # Add NPC ghost 2
-        self.ghost2.setPos(1500, 585)
+        self.ghost2.setPos(1500, 590)
         self.scene.addItem(self.ghost2)
         self.ghost2.start_pos()
 
-        # Add NPC bee
+        # Add NPC bee 1
         self.bee1.setPos(1700, 510)
         self.scene.addItem(self.bee1)
         self.bee1.start_pos()
 
+        # Add NPC bee 2
+        self.bee2.setPos(2500, 530)
+        self.scene.addItem(self.bee2)
+        self.bee2.start_pos()
+
         # Add NPC frog
-        self.frog1.setPos(600, 621)
+        self.frog1.setPos(2000, 621)
         self.scene.addItem(self.frog1)
         self.frog1.start_pos()
 
@@ -279,7 +302,10 @@ class GUI(QtWidgets.QMainWindow):
         self.ghost.game_update_ghost()
         self.ghost2.game_update_ghost()
         self.bee1.game_update_bee()
+        self.bee2.game_update_bee()
         self.frog1.game_update_frog()
+        # Update cloud movement
+        self.move_clouds()
 
     def checkColliding(self):
         if QtWidgets.QGraphicsItem.collidingItems(self.player):
@@ -310,6 +336,11 @@ class GUI(QtWidgets.QMainWindow):
                     self.player.player_death()
                     self.death = True
                     self.pause_game()
+
+            if self.bee2 in QtWidgets.QGraphicsItem.collidingItems(self.player):
+                self.player.player_death()
+                self.death = True
+                self.pause_game()
 
             if self.box1 in QtWidgets.QGraphicsItem.collidingItems(self.player):
                 print("COLLISION WITH box1")
@@ -425,6 +456,25 @@ class GUI(QtWidgets.QMainWindow):
             if self.ghost_menu.x() > 900:
                 self.menuFlag = True
 
+    def move_clouds(self):
+        # Move clouds
+        if self.cloud1.x() < SCENE_WIDTH:
+            self.cloud1.setPos(self.cloud1.x()+0.5, self.cloud1.y())
+        if self.cloud1.x() > SCENE_WIDTH:
+            self.cloud1.setPos(500, self.cloud1.y())
+        if self.cloud2.x() < SCENE_WIDTH:
+            self.cloud2.setPos(self.cloud2.x()+0.5, self.cloud2.y())
+        if self.cloud2.x() > SCENE_WIDTH:
+            self.cloud2.setPos(200, self.cloud2.y())
+        if self.cloud3.x() < SCENE_WIDTH:
+            self.cloud3.setPos(self.cloud3.x()+0.5, self.cloud3.y())
+        if self.cloud3.x() > SCENE_WIDTH:
+            self.cloud3.setPos(200, self.cloud3.y())
+        if self.cloud4.x() < SCENE_WIDTH:
+            self.cloud4.setPos(self.cloud4.x()+0.5, self.cloud4.y())
+        if self.cloud4.x() > SCENE_WIDTH:
+            self.cloud4.setPos(200, self.cloud4.y())
+
 player_speed = 6
 
 class Player(QGraphicsPixmapItem):
@@ -465,7 +515,7 @@ class Player(QGraphicsPixmapItem):
         # Initiate needed variables and timer for the jumping and ducking and in case of death
         self.jumpFlag = False
         self.duckFlag = False
-        self.jump_speed = 6
+        self.jump_speed = 7
         self.mass = 1
         self.duck_time = 15
         self.timer()
@@ -473,7 +523,7 @@ class Player(QGraphicsPixmapItem):
 
         # Initiate media player
         self.media_player = QtMultimedia.QMediaPlayer()
-        self.count = 0
+        self.jumpHeight = 428
 
 
     def timer(self):
@@ -493,7 +543,7 @@ class Player(QGraphicsPixmapItem):
 
     def game_update(self, keys_pressed, collision_x, collision_y):
         # Read the keys pressed and make the player object react to them.
-        # self.c_y = collision_y
+        self.c_y = collision_y
         dx = 0
         dy = 0
         if Qt.Key_A in keys_pressed:
@@ -526,6 +576,9 @@ class Player(QGraphicsPixmapItem):
 
         # Update the position of the player in x and y axis.
         self.setPos(self.x()+dx, self.y()+dy)
+        """if self.c_y != "U" and self.y() < 428:
+            self.setPos(self.x(), 568)"""
+
 
     def player_death(self):
         self.setPixmap(self.hurt)
@@ -555,6 +608,7 @@ class Player(QGraphicsPixmapItem):
             # decreasing velocity while going up
             # and become negative while coming down
             self.jump_speed = self.jump_speed - 1
+            print(self.y())
 
             """if self.c_y == "U":
                 # making jump equal to false
@@ -562,7 +616,7 @@ class Player(QGraphicsPixmapItem):
 
                 # setting original values to
                 # speed  and mass
-                self.jump_speed = 6
+                self.jump_speed = 7
                 self.mass = 1
                 # Switch back to stand pixmap image
                 self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))"""
@@ -574,13 +628,13 @@ class Player(QGraphicsPixmapItem):
                 self.mass = -1
 
             # objected reaches its original state
-            if self.jump_speed == -7:
+            if self.jump_speed == -8:
                 # making jump equal to false
                 self.jumpFlag = False
 
                 # setting original values to
                 # speed  and mass
-                self.jump_speed = 6
+                self.jump_speed = 7
                 self.mass = 1
                 # Switch back to stand pixmap image
                 self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))

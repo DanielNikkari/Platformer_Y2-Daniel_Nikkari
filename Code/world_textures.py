@@ -19,7 +19,10 @@ class WorldTextures(QGraphicsPixmapItem):
                               "wasd": QPixmap("Textures/Menu_Textures/wasd_keys_withoutbg.png"),
                               "ghost_menu": QPixmap("Textures/NPC_Textures/ghost_normal.png"),
                               "menu_player": QPixmap("Textures/Menu_Textures/alienGreen.png"),
-                              "box": QPixmap("Textures/Obstacle_Textures/box.png")}
+                              "box": QPixmap("Textures/Obstacle_Textures/box.png"),
+                              "bush": QPixmap("Textures/bg/bush.png"),
+                              "cloud1": QPixmap("Textures/bg/cloud1.png"),
+                              "cloud2": QPixmap("Textures/bg/cloud2.png")}
         # Pick the wanted texture from the dictionary
         wanted_texture = self.worldTextures[texture]
         self.setPixmap(wanted_texture)

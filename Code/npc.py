@@ -109,7 +109,7 @@ class NPC(QGraphicsPixmapItem):
         # Check if frog is dead or not
         if self.frogDeadFlag:
             self.setPixmap(self.frog_dead)
-            self.setPos(self.x(), self.start_y)
+            self.setPos(self.x(), self.start_y+20)
         else:
             dx = 0
             if self.pointFlag:
