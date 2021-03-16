@@ -1,0 +1,40 @@
+PLATFORMER GAME PROJECT CS-A1121 Y2
+DANIEL NIKKARI, 653088
+
+1. 
+The game so far has a working gui, it's ran from main.py. In the game first
+appears a menu screen which has two buttons start and quit. Start button initiates
+the map and adds players and npcs to the scene. Quit button quits the application.
+In the game player can move their character by pressing w, a, s and d keys.
+A is left, D is right, W is jump, S is duck. In the game there are NPCs
+(non-player characters). Players mission is to get through these NPCs without
+touching them, if player touches an NPC then he will die and game will pause
+and give options to either restart the game or go back to menu. Frog NPC
+differs to other NPCs in a way that player can jump on it to kill the frog NPC.
+The game has a basic set of audio, it has it's theme music playing on loop,
+it has an jumping sound effect and click sound effect, in addition it has a
+player death sound effect. The game does not have a completed map or a working 
+nor score taking or keeping. The game can be ran, however, the loading of the
+map will take a lot of time, depending on the speed of the computer.
+
+2. 
+You can run the program. 
+Program can be ran from the main.py.
+So far you can load a map and move your character and get past some demo NPCs
+and in case you hit them you get game over screen and get an option to try
+again or to go back to the menu.
+
+3.
+So far I have spent approximately 30h on the project. The biggest difference for
+the time schedule is that I'm ahead of the schedule in terms of the state of the
+program.
+
+4.
+There has been a problem with clearing the scene from perviously loaded items
+that are not needed anymore. I can't find the reason for the crash when trying
+to clear the scene. Other problem I have is making a working collision
+for player to be able to jump on boxes. In addition, the map loading time is
+way too long but I can't seem to be able to work around the problem.
+
+So far the biggest change in plans is the buttons used to control the player and
+the changes in time chedule.
