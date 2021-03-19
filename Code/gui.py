@@ -2,6 +2,7 @@ from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
 from PyQt5.Qt import Qt
 from world_textures import WorldTextures
 from npc import NPC
+from clouds import Clouds
 import math
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
@@ -40,9 +41,8 @@ class GUI(QtWidgets.QMainWindow):
         self.frog1 = NPC("frog")
 
         # Initiate clouds
-        self.cloud1 = WorldTextures("cloud1")
-        self.cloud2 = WorldTextures("cloud2")
-        self.cloud3, self.cloud4 = WorldTextures("cloud1"), WorldTextures("cloud2")
+        self.cloud1, self.cloud2, self.cloud3, self.cloud4 = Clouds("cloud1"), Clouds("cloud2"), Clouds("cloud1"), Clouds("cloud2")
+        self.cloud5 = Clouds("cloud2")
 
         # Init world textures
         self.background1 = WorldTextures("backgroundTex")
@@ -133,6 +133,12 @@ class GUI(QtWidgets.QMainWindow):
                 self.background1.setPos((0+x*background_size), (0+y*background_size))
                 self.scene.addItem(self.background1)
 
+        # Add menu clouds
+        self.cloud1, self.cloud2, self.cloud3, self.cloud4 = Clouds("cloud1"), Clouds("cloud2"), Clouds("cloud1"), Clouds("cloud2")
+        self.cloud1.setPos(10, 650), self.cloud2.setPos(600, 250), self.cloud3.setPos(150, 400), self.cloud4.setPos(500, 150)
+        self.scene.addItem(self.cloud1), self.scene.addItem(self.cloud2), self.scene.addItem(self.cloud3), self.scene.addItem(self.cloud4)
+
+
         # Add a ghost NPC on the menu
         self.ghost_menu = WorldTextures("ghost_menu")
         scaled_ghost_pixmap = self.ghost_menu.pixmap().scaled(350, 100, QtCore.Qt.KeepAspectRatio)
@@ -201,33 +207,14 @@ class GUI(QtWidgets.QMainWindow):
                 self.background1.setPos((0+x*background_size), (0+y*background_size))
                 self.scene.addItem(self.background1)
 
-        # Add a sun texture on the map
-        self.sun = WorldTextures("sun")
-        scaled_sun_pixmap = self.sun.pixmap().scaled(500, 500, QtCore.Qt.KeepAspectRatio)
-        self.sun.setPixmap(scaled_sun_pixmap)
-        self.sun.setPos(SCENE_WIDTH/2, -200)
-        self.scene.addItem(self.sun)
-
-        # Add background objects
-        self.cloud1 = WorldTextures("cloud1")
-        self.cloud1.setPos(500, 150)
-        self.scene.addItem(self.cloud1)
-        self.cloud2 = WorldTextures("cloud2")
-        self.cloud2.setPos(200, 250)
-        self.scene.addItem(self.cloud2)
-        self.cloud3, self.cloud4 = WorldTextures("cloud1"), WorldTextures("cloud2")
-        self.cloud3.setPos(1500, 200)
-        self.cloud4.setPos(2500, 300)
-        self.scene.addItem(self.cloud3)
-        self.scene.addItem(self.cloud4)
-
-        """# Add a school texture on the map
-        school = WorldTextures("school")
-        school.setPos(1000, 100)
-        self.scene.addItem(school)"""
+        # Add clouds
+        self.cloud1, self.cloud2, self.cloud3, self.cloud4, self.cloud5 = Clouds("cloud1"), Clouds("cloud2"), Clouds("cloud1"), Clouds("cloud2"), Clouds("cloud2")
+        self.cloud1.setPos(500, 150), self.cloud2.setPos(200, 250), self.cloud3.setPos(1500, 200), self.cloud4.setPos(2500, 300), self.cloud5.setPos(3500, 100)
+        self.scene.addItem(self.cloud1), self.scene.addItem(self.cloud2), self.scene.addItem(self.cloud3), self.scene.addItem(self.cloud4), self.scene.addItem(self.cloud5)
 
         # Add ground textures to the scene
         grassTiles = math.ceil(SCENE_WIDTH/BOX_DIM)
+        #grassMidPix = WorldTextures("grassMidTex")
         for x in range(grassTiles):
             self.grassMid = WorldTextures("grassMidTex")
             self.grassMid.setPos((0+x*BOX_DIM), 660)
@@ -243,6 +230,7 @@ class GUI(QtWidgets.QMainWindow):
         self.box2 = WorldTextures("box")
         self.box2.setPos(500, 660-2*BOX_DIM)
         self.scene.addItem(self.box2)
+
 
         # Add NPC ghost 1
         self.ghost.setPos(1000, 590)
@@ -260,7 +248,7 @@ class GUI(QtWidgets.QMainWindow):
         self.bee1.start_pos()
 
         # Add NPC bee 2
-        self.bee2.setPos(2500, 530)
+        self.bee2.setPos(2500, 540)
         self.scene.addItem(self.bee2)
         self.bee2.start_pos()
 
@@ -305,7 +293,9 @@ class GUI(QtWidgets.QMainWindow):
         self.bee2.game_update_bee()
         self.frog1.game_update_frog()
         # Update cloud movement
-        self.move_clouds()
+        #self.move_clouds()
+        self.cloud1.move_clouds(SCENE_WIDTH), self.cloud2.move_clouds(SCENE_WIDTH)
+        self.cloud3.move_clouds(SCENE_WIDTH), self.cloud4.move_clouds(SCENE_WIDTH)
 
     def checkColliding(self):
         if QtWidgets.QGraphicsItem.collidingItems(self.player):
@@ -455,25 +445,6 @@ class GUI(QtWidgets.QMainWindow):
             self.ghost_menu.setPos(self.ghost_menu.x() + dx, self.ghost_menu.y())
             if self.ghost_menu.x() > 900:
                 self.menuFlag = True
-
-    def move_clouds(self):
-        # Move clouds
-        if self.cloud1.x() < SCENE_WIDTH:
-            self.cloud1.setPos(self.cloud1.x()+0.5, self.cloud1.y())
-        if self.cloud1.x() > SCENE_WIDTH:
-            self.cloud1.setPos(500, self.cloud1.y())
-        if self.cloud2.x() < SCENE_WIDTH:
-            self.cloud2.setPos(self.cloud2.x()+0.5, self.cloud2.y())
-        if self.cloud2.x() > SCENE_WIDTH:
-            self.cloud2.setPos(200, self.cloud2.y())
-        if self.cloud3.x() < SCENE_WIDTH:
-            self.cloud3.setPos(self.cloud3.x()+0.5, self.cloud3.y())
-        if self.cloud3.x() > SCENE_WIDTH:
-            self.cloud3.setPos(200, self.cloud3.y())
-        if self.cloud4.x() < SCENE_WIDTH:
-            self.cloud4.setPos(self.cloud4.x()+0.5, self.cloud4.y())
-        if self.cloud4.x() > SCENE_WIDTH:
-            self.cloud4.setPos(200, self.cloud4.y())
 
 player_speed = 6
 
