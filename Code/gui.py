@@ -3,6 +3,7 @@ from PyQt5.Qt import Qt
 from world_textures import WorldTextures
 from npc import NPC
 from clouds import Clouds
+from building_textures import BuildingTextures
 import math
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
@@ -27,9 +28,21 @@ class GUI(QtWidgets.QMainWindow):
         # Hold the set of keys pressed
         self.keys_pressed = set()
 
-        # Set timer
+        # Set timers
         self.timer = QtCore.QBasicTimer()
         self.timer.start(FRAME_TIME_MS, self)
+
+        self.curr_time_ms = 0
+        self.curr_time_s = 0
+        self.curr_time_m = 0
+        self.game_timer = QtCore.QTimer()
+        self.game_timer.timeout.connect(self.time)
+        self.time_text = QtWidgets.QGraphicsTextItem("Time: 00:00:00")
+        #self.time_text.setText("Time: 00:00:00")
+        self.time_text.setFont(QtGui.QFont("comic sans MS", 30))
+        self.time_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+
+        #self.game_timer.timeout.connect(self.time)
 
         # Initiate player and NPCs
         self.player = Player()
@@ -97,7 +110,13 @@ class GUI(QtWidgets.QMainWindow):
         self.start_button = QtWidgets.QPushButton()
         self.play_button = WorldTextures("start_button")
         self.quit_button = QtWidgets.QPushButton()
-        self.quit_button_tex = WorldTextures("quit_button")"""
+        self.quit_button_tex = WorldTextures("quit_button")
+        self.cloud1, self.cloud2, self.cloud3, self.cloud4 = Clouds("cloud1"), Clouds("cloud2"), Clouds("cloud1"), Clouds("cloud2")
+        self.cloud5 = Clouds("cloud2")
+        self.grassMid = WorldTextures("grassMidTex")
+        self.grassCenter = WorldTextures("grassCenterTex")
+        self.box1 = WorldTextures("box")
+        self.box2 = WorldTextures("box")"""
 
 
     def init_scene(self):
@@ -223,6 +242,85 @@ class GUI(QtWidgets.QMainWindow):
             self.grassCenter.setPos((0+x*BOX_DIM), 730)
             self.scene.addItem(self.grassCenter)
 
+        # Draw the end building
+        self.houseGrayBottomLeft, self.houseGrayBottomMid, self.houseGrayBottomRight = BuildingTextures("houseGrayBottomLeft"), BuildingTextures("houseGrayBottomMid"), BuildingTextures("houseGrayBottomRight")
+        self.houseGrayBottomLeft.setPos(SCENE_WIDTH-5*BOX_DIM, GROUND_LEVEL-BOX_DIM), self.houseGrayBottomRight.setPos(SCENE_WIDTH-BOX_DIM, GROUND_LEVEL-BOX_DIM)
+        self.scene.addItem(self.houseGrayBottomRight), self.scene.addItem(self.houseGrayBottomLeft)
+        for x in range(3):
+            self.houseGrayBottomMid = BuildingTextures("houseGrayBottomMid")
+            self.houseGrayBottomMid.setPos(SCENE_WIDTH-(x+2)*BOX_DIM, GROUND_LEVEL-BOX_DIM)
+            self.scene.addItem(self.houseGrayBottomMid)
+        self.houseGray = BuildingTextures("houseGray")
+        self.houseGrayMidLeft, self.houseGrayMidRight, self.houseGrayAlt, self.houseGrayAlt2 =\
+            BuildingTextures("houseGrayMidLeft"), BuildingTextures("houseGrayMidRight"), BuildingTextures("houseGrayAlt"), BuildingTextures("houseGrayAlt2")
+        for y in range(4):
+            for x in range(3):
+                self.houseGrayMidLeft = BuildingTextures("houseGrayMidLeft")
+                self.houseGrayMidRight = BuildingTextures("houseGrayMidRight")
+                self.houseGray = BuildingTextures("houseGray")
+                self.houseGrayAlt = BuildingTextures("houseGrayAlt")
+                self.houseGrayMidLeft.setPos(SCENE_WIDTH-5*BOX_DIM, GROUND_LEVEL-(y+2)*BOX_DIM)
+                self.houseGrayMidRight.setPos(SCENE_WIDTH-BOX_DIM, GROUND_LEVEL-(y+2)*BOX_DIM)
+                self.scene.addItem(self.houseGrayMidRight), self.scene.addItem(self.houseGrayMidLeft)
+                self.houseGray.setPos(SCENE_WIDTH-(x+2)*BOX_DIM, GROUND_LEVEL-(y+2)*BOX_DIM)
+                self.scene.addItem(self.houseGray)
+                if y % 2 == 0:
+                    self.houseGrayAlt.setPos(4860, GROUND_LEVEL-(y+2)*BOX_DIM)
+                else:
+                    self.houseGrayAlt.setPos(4720, GROUND_LEVEL-(y+2)*BOX_DIM)
+                self.scene.addItem(self.houseGrayAlt)
+        self.houseGrayTopLeft, self.houseGrayTopRight, self.houseGrayTopMid =\
+            BuildingTextures("houseGrayTopLeft"), BuildingTextures("houseGrayTopRight"), BuildingTextures("houseGrayTopMid")
+        self.houseGrayTopLeft.setPos(SCENE_WIDTH-5*BOX_DIM, GROUND_LEVEL-BOX_DIM*6), self.houseGrayTopRight.setPos(SCENE_WIDTH-BOX_DIM, GROUND_LEVEL-BOX_DIM*6)
+        self.scene.addItem(self.houseGrayTopRight), self.scene.addItem(self.houseGrayTopLeft)
+        for x in range(3):
+            self.houseGrayTopMid = BuildingTextures("houseGrayTopMid")
+            self.houseGrayTopMid.setPos(SCENE_WIDTH-(x+2)*BOX_DIM, GROUND_LEVEL-BOX_DIM*6)
+            self.scene.addItem(self.houseGrayTopMid)
+        self.roofRedLeft, self.roofRedRight, self.roofRedMid =\
+            BuildingTextures("roofRedLeft"), BuildingTextures("roofRedRight"), BuildingTextures("roofRedMid")
+        self.roofRedRight.setPos(SCENE_WIDTH-6*BOX_DIM, GROUND_LEVEL-BOX_DIM*7), self.roofRedLeft.setPos(SCENE_WIDTH, GROUND_LEVEL-BOX_DIM*7)
+        self.scene.addItem(self.roofRedRight), self.scene.addItem(self.roofRedLeft)
+        for x in range(5):
+            self.roofRedMid = BuildingTextures("roofRedMid")
+            self.roofRedMid.setPos(SCENE_WIDTH-(x+1)*BOX_DIM, GROUND_LEVEL-BOX_DIM*7)
+            self.scene.addItem(self.roofRedMid)
+        for y in range(3):
+            self.windowHighCheckeredBottom, self.windowHighCheckeredMid, self.windowHighCheckeredTop =\
+            BuildingTextures("windowHighCheckeredBottom"), BuildingTextures("windowHighCheckeredMid"), BuildingTextures("windowHighCheckeredTop")
+            if y == 0:
+                self.windowHighCheckeredBottom.setPos(SCENE_WIDTH-4*BOX_DIM, GROUND_LEVEL-BOX_DIM*(y+2))
+                self.scene.addItem(self.windowHighCheckeredBottom)
+            if y == 1:
+                self.windowHighCheckeredMid.setPos(SCENE_WIDTH-4*BOX_DIM, GROUND_LEVEL-BOX_DIM*(y+2))
+                self.scene.addItem(self.windowHighCheckeredMid)
+            if y == 2:
+                self.windowLowCheckered = BuildingTextures("windowLowCheckered")
+                self.windowLowCheckered.setPos(SCENE_WIDTH-3*BOX_DIM, GROUND_LEVEL-BOX_DIM*(y+4))
+                self.scene.addItem(self.windowLowCheckered)
+                self.windowHighCheckeredTop.setPos(SCENE_WIDTH-4*BOX_DIM, GROUND_LEVEL-BOX_DIM*(y+2))
+                self.scene.addItem(self.windowHighCheckeredTop)
+            self.windowHighCheckeredBottom, self.windowHighCheckeredMid, self.windowHighCheckeredTop =\
+            BuildingTextures("windowHighCheckeredBottom"), BuildingTextures("windowHighCheckeredMid"), BuildingTextures("windowHighCheckeredTop")
+            if y == 0:
+                self.windowHighCheckeredBottom.setPos(SCENE_WIDTH-2*BOX_DIM, GROUND_LEVEL-BOX_DIM*(y+2))
+                self.scene.addItem(self.windowHighCheckeredBottom)
+                self.signHangingBed = BuildingTextures("signHangingBed")
+                self.signHangingBed.setPos(SCENE_WIDTH-6*BOX_DIM, GROUND_LEVEL-BOX_DIM*(y+3))
+                self.scene.addItem(self.signHangingBed)
+            if y == 1:
+                self.windowHighCheckeredMid.setPos(SCENE_WIDTH-2*BOX_DIM, GROUND_LEVEL-BOX_DIM*(y+2))
+                self.scene.addItem(self.windowHighCheckeredMid)
+            if y == 2:
+                self.windowHighCheckeredTop.setPos(SCENE_WIDTH-2*BOX_DIM, GROUND_LEVEL-BOX_DIM*(y+2))
+                self.scene.addItem(self.windowHighCheckeredTop)
+                self.anemometer = BuildingTextures("anemometer")
+                self.anemometer.setPos(SCENE_WIDTH-3*BOX_DIM, GROUND_LEVEL-BOX_DIM*8)
+                self.scene.addItem(self.anemometer)
+        self.doorLock, self.doorPlateTop = BuildingTextures("doorLock"), BuildingTextures("doorPlateTop")
+        self.doorLock.setPos(SCENE_WIDTH-3*BOX_DIM, GROUND_LEVEL-BOX_DIM), self.doorPlateTop.setPos(SCENE_WIDTH-3*BOX_DIM, GROUND_LEVEL-BOX_DIM*2)
+        self.scene.addItem(self.doorLock), self.scene.addItem(self.doorPlateTop)
+
         # Add obstacles
         self.box1 = WorldTextures("box")
         self.box1.setPos(500, 660-BOX_DIM)
@@ -233,7 +331,7 @@ class GUI(QtWidgets.QMainWindow):
 
 
         # Add NPC ghost 1
-        self.ghost.setPos(1000, 590)
+        """self.ghost.setPos(1000, 590)
         self.scene.addItem(self.ghost)
         self.ghost.start_pos()
 
@@ -255,7 +353,7 @@ class GUI(QtWidgets.QMainWindow):
         # Add NPC frog
         self.frog1.setPos(2000, 621)
         self.scene.addItem(self.frog1)
-        self.frog1.start_pos()
+        self.frog1.start_pos()"""
 
         # Add player item to the scene.
         self.player.setPos((800-self.player.pixmap().width())/2, 568)
@@ -263,6 +361,11 @@ class GUI(QtWidgets.QMainWindow):
         self.player.grabKeyboard()
         self.player.setFlag(QtWidgets.QGraphicsItem.ItemIsFocusable)
         self.player.setFocus()
+
+        self.gameTimer()
+        self.time_text.setPos(self.player.x()+100, 30)
+        self.scene.addItem(self.time_text)
+        print("END")
 
     def keyPressEvent(self, event):
         # Log the pressed key to keys_pressed
@@ -280,6 +383,9 @@ class GUI(QtWidgets.QMainWindow):
         self.update()
         # Make the view follow the players position
         self.view.centerOn(self.player.x(), self.player.y())
+        if self.time_text.x()+self.time_text.boundingRect().width() <= SCENE_WIDTH:
+            print("A")
+            self.time_text.setPos(self.player.x()+100, 30)
 
     def game_update(self):
         # Update the class Player game_update function
@@ -293,7 +399,6 @@ class GUI(QtWidgets.QMainWindow):
         self.bee2.game_update_bee()
         self.frog1.game_update_frog()
         # Update cloud movement
-        #self.move_clouds()
         self.cloud1.move_clouds(SCENE_WIDTH), self.cloud2.move_clouds(SCENE_WIDTH)
         self.cloud3.move_clouds(SCENE_WIDTH), self.cloud4.move_clouds(SCENE_WIDTH)
 
@@ -404,6 +509,7 @@ class GUI(QtWidgets.QMainWindow):
         self.death = False
         #self.scene.clear()
         self.init_player_and_NPCs()
+        #self.init_world_items()
         self.draw_map()
         self.timer.start(FRAME_TIME_MS, self)
 
@@ -415,6 +521,7 @@ class GUI(QtWidgets.QMainWindow):
         self.death = False
         #self.scene.clear()
         self.init_player_and_NPCs()
+        #self.init_world_items()
         self.display_main_menu()
         self.timer.start(FRAME_TIME_MS, self)
 
@@ -445,6 +552,32 @@ class GUI(QtWidgets.QMainWindow):
             self.ghost_menu.setPos(self.ghost_menu.x() + dx, self.ghost_menu.y())
             if self.ghost_menu.x() > 900:
                 self.menuFlag = True
+
+    def gameTimer(self):
+        self.game_timer.start(100)
+
+    def time(self):
+        self.curr_time_ms += 10
+        if self.curr_time_ms == 60:
+            self.curr_time_s += 1
+            self.curr_time_ms = 0
+        if self.curr_time_s == 60:
+            self.curr_time_m += 1
+            self.curr_time_s = 0
+        y_pos = self.time_text.y()
+        x_pos = self.time_text.x()
+        self.scene.removeItem(self.time_text)
+        self.time_text = QtWidgets.QGraphicsTextItem("Time: {}:{}:{}".format(self.curr_time_m, self.curr_time_s, self.curr_time_ms))
+        self.time_text.setFont(QtGui.QFont("comic sans MS", 30))
+        self.time_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+        if x_pos+self.time_text.boundingRect().width() <= 5000:
+            self.time_text.setPos(x_pos, y_pos)
+        else:
+            self.time_text.setPos(SCENE_WIDTH-self.time_text.boundingRect().width(), y_pos)
+        self.scene.addItem(self.time_text)
+
+
+
 
 player_speed = 6
 
@@ -626,39 +759,3 @@ class Player(QGraphicsPixmapItem):
                 self.duckFlag = False
                 self.duck_time = 15
                 self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
-
-"""class NPC_ghost(QGraphicsPixmapItem):
-
-    # NPC ghost class that initiates ghost graphics and processes movement algorithm.
-
-    def __init__(self, parent = None):
-
-        # Initiate the Pixmap graphics item
-        QGraphicsPixmapItem.__init__(self, parent)
-        # Set a png file to the graphics item.
-        self.setPixmap(QPixmap("Textures/NPC_Textures/ghost.png"))
-        self.setTransformOriginPoint(33, 45)
-        self.pointFlag = True
-        self.start_x = 0
-
-    def start_pos(self):
-        # Get the ghosts start x pos to anchor the ghosts movement around it.
-        self.start_x = self.x()
-
-    def game_update(self):
-        # Make ghost move back and forth
-        dx = 0
-        if self.pointFlag:
-            dx -= 3
-            self.setPos(self.x() + dx, self.y())
-            if self.x() < (self.start_x - 150):
-                self.pointFlag = False
-
-        if not self.pointFlag:
-            dx += 5
-            self.setPos(self.x() + dx, self.y())
-            if self.x() > (self.start_x + 150):
-                self.pointFlag = True"""
-
-
-
