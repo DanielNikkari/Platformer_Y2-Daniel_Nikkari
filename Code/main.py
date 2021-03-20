@@ -5,7 +5,6 @@ from PyQt5 import (QtWidgets, QtMultimedia, QtCore)
 def main():
     # Main function from where the program is ran
     app = QtWidgets.QApplication(sys.argv)
-    #menu = Menu()
     gui = GUI()
     playlist = QtMultimedia.QMediaPlaylist()
     url = QtCore.QUrl.fromLocalFile("Audio/Music/bg_lofiBeat.mp3")
