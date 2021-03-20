@@ -3,6 +3,7 @@ from PyQt5.Qt import Qt
 from world_textures import WorldTextures
 from npc import NPC
 from clouds import Clouds
+from fireball import FireBall
 from building_textures import BuildingTextures
 import math
 from PyQt5.QtWidgets import QGraphicsPixmapItem
@@ -28,6 +29,9 @@ class GUI(QtWidgets.QMainWindow):
         # Hold the set of keys pressed
         self.keys_pressed = set()
 
+        # Set score board
+        self.score_board = [None, None, None, None, None]
+
         # Set timers
         self.timer = QtCore.QBasicTimer()
         self.timer.start(FRAME_TIME_MS, self)
@@ -44,14 +48,20 @@ class GUI(QtWidgets.QMainWindow):
 
         #self.game_timer.timeout.connect(self.time)
 
-        # Initiate player and NPCs
+        # Initiate player and NPCs and fire ball and key
         self.player = Player()
+        self.key = WorldTextures("key")
+        self.keyFlag = False
+        self.fire_ball_count = 2
+        self.fire_ball_flag = False
+        self.fire_ball = FireBall()
         self.ghost = NPC("ghost")
         self.ghost2 = NPC("ghost")
         self.ghost_menu = WorldTextures("ghost_menu")
         self.bee1 = NPC("bee")
         self.bee2 = NPC("bee")
         self.frog1 = NPC("frog")
+        self.snakeSlime = NPC("snakeSlime")
 
         # Initiate clouds
         self.cloud1, self.cloud2, self.cloud3, self.cloud4 = Clouds("cloud1"), Clouds("cloud2"), Clouds("cloud1"), Clouds("cloud2")
@@ -76,6 +86,7 @@ class GUI(QtWidgets.QMainWindow):
         # Initiate media player and click sound effect location
         self.media_player = QtMultimedia.QMediaPlayer()
         self.click_sound_url = QtCore.QUrl.fromLocalFile("Audio/SoundEffects/click_sound_effect.mp3")
+        self.fireball_sound_url = QtCore.QUrl.fromLocalFile("Audio/SoundEffects/fireBall_soundeffect.mp3")
 
         # Variables
         self.menuFlag = True
@@ -101,6 +112,7 @@ class GUI(QtWidgets.QMainWindow):
         self.bee1 = NPC("bee")
         self.bee2 = NPC("bee")
         self.frog1 = NPC("frog")
+        self.snakeSlime = NPC("snakeSlime")
 
     """def init_world_items(self):
         self.background1 = WorldTextures("backgroundTex")
@@ -330,8 +342,8 @@ class GUI(QtWidgets.QMainWindow):
         self.scene.addItem(self.box2)
 
 
-        # Add NPC ghost 1
-        """self.ghost.setPos(1000, 590)
+        """# Add NPC ghost 1
+        self.ghost.setPos(1000, 590)
         self.scene.addItem(self.ghost)
         self.ghost.start_pos()
 
@@ -354,6 +366,10 @@ class GUI(QtWidgets.QMainWindow):
         self.frog1.setPos(2000, 621)
         self.scene.addItem(self.frog1)
         self.frog1.start_pos()"""
+
+        # Add NPC snakeSlime
+        self.snakeSlime.setPos(3000, GROUND_LEVEL-self.snakeSlime.boundingRect().height())
+        self.scene.addItem(self.snakeSlime)
 
         # Add player item to the scene.
         self.player.setPos((800-self.player.pixmap().width())/2, 568)
@@ -383,13 +399,27 @@ class GUI(QtWidgets.QMainWindow):
         self.update()
         # Make the view follow the players position
         self.view.centerOn(self.player.x(), self.player.y())
-        if self.time_text.x()+self.time_text.boundingRect().width() <= SCENE_WIDTH:
-            print("A")
+        if self.time_text.x()+self.time_text.boundingRect().width() < SCENE_WIDTH-100:
             self.time_text.setPos(self.player.x()+100, 30)
+        else:
+            self.time_text.setPos(5000-100-self.time_text.boundingRect().width(), 30)
 
     def game_update(self):
         # Update the class Player game_update function
         self.player.game_update(self.keys_pressed, self.collision_x, self.collision_y)
+        # If E key is pressed create fireball
+        if Qt.Key_E in self.keys_pressed:
+            if self.fire_ball_count > 0:
+                self.media_player.setMedia(QtMultimedia.QMediaContent(self.fireball_sound_url))
+                self.media_player.setVolume(70)
+                self.media_player.play()
+                self.scene.removeItem(self.fire_ball)
+                self.fire_ball = FireBall()
+                self.fire_ball.setPos(self.player.x(), self.player.y()+30)
+                self.fire_ball.fireball_startpos()
+                self.scene.addItem(self.fire_ball)
+                self.fire_ball_flag = True
+                self.fire_ball_count -= 0.2
         self.checkColliding()
         # Update some NPC functions
         self.ghost_menu_movement()
@@ -398,11 +428,27 @@ class GUI(QtWidgets.QMainWindow):
         self.bee1.game_update_bee()
         self.bee2.game_update_bee()
         self.frog1.game_update_frog()
+        self.snakeSlime.game_update_snakeSlime()
         # Update cloud movement
         self.cloud1.move_clouds(SCENE_WIDTH), self.cloud2.move_clouds(SCENE_WIDTH)
         self.cloud3.move_clouds(SCENE_WIDTH), self.cloud4.move_clouds(SCENE_WIDTH)
+        # Move the fireball
+        if self.fire_ball_flag:
+            self.fire_ball.fireBallFly()
 
     def checkColliding(self):
+        if self.ghost in QtWidgets.QGraphicsItem.collidingItems(self.fire_ball):
+            self.scene.removeItem(self.ghost)
+        if self.ghost2 in QtWidgets.QGraphicsItem.collidingItems(self.fire_ball):
+            self.scene.removeItem(self.ghost2)
+        if self.bee1 in QtWidgets.QGraphicsItem.collidingItems(self.fire_ball):
+            self.scene.removeItem(self.bee1)
+        if self.bee2 in QtWidgets.QGraphicsItem.collidingItems(self.fire_ball):
+            self.scene.removeItem(self.bee2)
+        if self.snakeSlime in QtWidgets.QGraphicsItem.collidingItems(self.fire_ball):
+            self.key.setPos(3000, GROUND_LEVEL-self.key.boundingRect().height())
+            self.scene.addItem(self.key)
+            self.scene.removeItem(self.snakeSlime)
         if QtWidgets.QGraphicsItem.collidingItems(self.player):
             if self.ghost in QtWidgets.QGraphicsItem.collidingItems(self.player):
                 print("COLLISION WITH ghost 1")
@@ -437,6 +483,80 @@ class GUI(QtWidgets.QMainWindow):
                 self.death = True
                 self.pause_game()
 
+            if self.snakeSlime in QtWidgets.QGraphicsItem.collidingItems(self.player):
+                self.player.player_death()
+                self.death = True
+                self.pause_game()
+
+            if self.key in QtWidgets.QGraphicsItem.collidingItems(self.player):
+                if Qt.Key_F in self.keys_pressed:
+                    self.scene.removeItem(self.key)
+                    self.keyFlag = True
+
+            if self.doorLock in QtWidgets.QGraphicsItem.collidingItems(self.player) and self.keyFlag:
+                if Qt.Key_F in self.keys_pressed:
+                    self.doorOpen, self.doorOpenTop = BuildingTextures("doorOpen"), BuildingTextures("doorOpenTop")
+                    self.doorOpen.setPos(SCENE_WIDTH-3*BOX_DIM, GROUND_LEVEL-BOX_DIM), self.doorOpenTop.setPos(SCENE_WIDTH-3*BOX_DIM, GROUND_LEVEL-BOX_DIM*2)
+                    self.scene.addItem(self.doorOpen), self.scene.addItem(self.doorOpenTop)
+                    playerPosX, playerPosY = self.player.x(), self.player.y()
+                    self.scene.removeItem(self.player)
+                    self.player = Player()
+                    self.player.setPos(playerPosX, playerPosY)
+                    self.scene.addItem(self.player)
+                    if self.doorOpen in QtWidgets.QGraphicsItem.collidingItems(self.player) and self.keyFlag:
+                        if Qt.Key_F in self.keys_pressed:
+                            self.gameTimerStop()
+                            # Add complete text
+                            self.title_text = QtWidgets.QGraphicsTextItem("THANKS FOR PLAYING!")
+                            self.title_text.setFont(QtGui.QFont("comic sans MS", 50))
+                            self.title_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+                            self.title_text.setPos(self.player.x()-750, self.player.y()-300)
+                            self.scene.addItem(self.title_text)
+
+                            # Add timer text
+                            self.scene.removeItem(self.time_text)
+                            self.time_text = QtWidgets.QGraphicsTextItem("Your time: {}:{}:{}".format(self.curr_time_m, self.curr_time_s, self.curr_time_ms))
+                            self.time_text.setFont(QtGui.QFont("comic sans MS", 30))
+                            self.time_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+                            self.time_text.setPos(self.player.x()-600, self.player.y()-100)
+                            self.scene.addItem(self.time_text)
+
+                            # Add a push button that will be used to restart the map
+                            self.restart = QtWidgets.QPushButton()
+                            self.restart.setGeometry(QtCore.QRect(0, 0, 280, 80))
+                            self.restart.setText("RESTART")
+                            self.restart.move(self.player.x()-400, self.player.y()-100)
+                            self.scene.addWidget(self.restart)
+                            self.restart.clicked.connect(self.clickMethodRestart)
+
+                            # Add a push button that will be used to go back to main menu
+                            self.backMenu = QtWidgets.QPushButton()
+                            self.backMenu.setGeometry(QtCore.QRect(0, 0, 280, 80))
+                            self.backMenu.setText("BACK TO MENU")
+                            self.backMenu.move(self.player.x()-400, self.player.y()+50)
+                            self.scene.addWidget(self.backMenu)
+                            self.backMenu.clicked.connect(self.clickMethodBackMenu)
+
+                            # Save score
+                            i = 0
+                            for score in self.score_board:
+                                if score == None:
+                                    self.score_board[i] = [self.curr_time_m, self.curr_time_s, self.curr_time_ms]
+                                else:
+                                    print("A")
+                                    if self.curr_time_m <= score[0]:
+                                        print(score[0])
+                                        if self.curr_time_s <= score[1]:
+                                            print(score[1])
+                                            if self.curr_time_ms < score[2]:
+                                                print(score[2])
+                                                self.score_board[i] = [self.curr_time_m, self.curr_time_s, self.curr_time_ms]
+                                i += 1
+
+
+                            print(self.score_board)
+
+
             if self.box1 in QtWidgets.QGraphicsItem.collidingItems(self.player):
                 print("COLLISION WITH box1")
                 #self.collision = True
@@ -469,6 +589,11 @@ class GUI(QtWidgets.QMainWindow):
 
 
         if self.death:
+            # Stop game timer
+            self.gameTimerStop()
+            #self.curr_time_ms, self.curr_time_s, self.curr_time_m = 0, 0, 0
+            # Replenish fire balls
+            self.fire_ball_count = 2
             # Add game over text
             self.title_text = QtWidgets.QGraphicsTextItem("GAME OVER")
             self.title_text.setFont(QtGui.QFont("comic sans MS", 50))
@@ -503,6 +628,7 @@ class GUI(QtWidgets.QMainWindow):
 
     def clickMethodRestart(self):
         # PLay click sound effect
+        self.curr_time_ms, self.curr_time_s, self.curr_time_m = 0, 0, 0
         self.media_player.setMedia(QtMultimedia.QMediaContent(self.click_sound_url))
         self.media_player.setVolume(30)
         self.media_player.play()
@@ -515,6 +641,7 @@ class GUI(QtWidgets.QMainWindow):
 
     def clickMethodBackMenu(self):
         # PLay click sound effect
+        self.curr_time_ms, self.curr_time_s, self.curr_time_m = 0, 0, 0
         self.media_player.setMedia(QtMultimedia.QMediaContent(self.click_sound_url))
         self.media_player.setVolume(30)
         self.media_player.play()
@@ -556,6 +683,9 @@ class GUI(QtWidgets.QMainWindow):
     def gameTimer(self):
         self.game_timer.start(100)
 
+    def gameTimerStop(self):
+        self.game_timer.stop()
+
     def time(self):
         self.curr_time_ms += 10
         if self.curr_time_ms == 60:
@@ -575,7 +705,6 @@ class GUI(QtWidgets.QMainWindow):
         else:
             self.time_text.setPos(SCENE_WIDTH-self.time_text.boundingRect().width(), y_pos)
         self.scene.addItem(self.time_text)
-
 
 
 
@@ -628,6 +757,7 @@ class Player(QGraphicsPixmapItem):
         # Initiate media player
         self.media_player = QtMultimedia.QMediaPlayer()
         self.jumpHeight = 428
+
 
 
     def timer(self):

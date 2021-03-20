@@ -20,7 +20,8 @@ class WorldTextures(QGraphicsPixmapItem):
                               "box": QPixmap("Textures/Obstacle_Textures/box.png"),
                               "bush": QPixmap("Textures/bg/bush.png"),
                               "cloud1": QPixmap("Textures/bg/cloud1.png"),
-                              "cloud2": QPixmap("Textures/bg/cloud2.png")}
+                              "cloud2": QPixmap("Textures/bg/cloud2.png"),
+                              "key": QPixmap("PlayerTextures/Items/keyYellow.png")}
         # Pick the wanted texture from the dictionary
         wanted_texture = self.worldTextures[texture]
         self.setPixmap(wanted_texture)
