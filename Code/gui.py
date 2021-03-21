@@ -30,7 +30,7 @@ class GUI(QtWidgets.QMainWindow):
         self.keys_pressed = set()
 
         # Set score board
-        self.score_board = [None, None, None, None, None]
+        self.score_board = [[None, None, None], [None, None, None], [None, None, None], [None, None, None], [None, None, None]]
 
         # Set timers
         self.timer = QtCore.QBasicTimer()
@@ -89,6 +89,7 @@ class GUI(QtWidgets.QMainWindow):
         self.fireball_sound_url = QtCore.QUrl.fromLocalFile("Audio/SoundEffects/fireBall_soundeffect.mp3")
 
         # Variables
+        self.victoryFlag = False
         self.menuFlag = True
         self.death = False
         self.collision_x = None
@@ -225,6 +226,23 @@ class GUI(QtWidgets.QMainWindow):
         self.quit_button_tex.setPixmap(scaled_quit_button_pixmap)
         self.quit_button_tex.setPos((SCREEN_WIDTH/2)-150, 500)
         self.scene.addItem(self.quit_button_tex)
+
+        # Add score board
+
+        self.score_text = QtWidgets.QGraphicsTextItem("Top 5:\n1st:{}m {}s {}ms\n2nd:{}m {}s {}ms\n3rd:{}m {}s {}ms\n4th:{}m {}s {}ms"
+                                                      "\n5th:{}m {}s {}ms\n".format(self.score_board[0][0],
+                                                                                    self.score_board[0][1], self.score_board[0][2],
+                                                                                    self.score_board[1][0], self.score_board[1][1],
+                                                                                    self.score_board[1][2], self.score_board[2][0],
+                                                                                    self.score_board[2][1], self.score_board[2][2],
+                                                                                    self.score_board[3][0], self.score_board[3][1],
+                                                                                    self.score_board[3][2], self.score_board[4][0],
+                                                                                    self.score_board[4][1], self.score_board[4][2]))
+        self.score_text.setPos(SCREEN_WIDTH-self.score_text.boundingRect().width()-150, 350)
+        self.score_text.setFont(QtGui.QFont("comic sans", 20))
+        self.score_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+        if None not in self.score_board[0]:
+            self.scene.addItem(self.score_text)
 
     def draw_map(self):
         # Draw a background
@@ -505,7 +523,9 @@ class GUI(QtWidgets.QMainWindow):
                     self.scene.addItem(self.player)
                     if self.doorOpen in QtWidgets.QGraphicsItem.collidingItems(self.player) and self.keyFlag:
                         if Qt.Key_F in self.keys_pressed:
-                            self.gameTimerStop()
+                            self.victoryFlag = True
+                            self.pause_game()
+                            """self.gameTimerStop()
                             # Add complete text
                             self.title_text = QtWidgets.QGraphicsTextItem("THANKS FOR PLAYING!")
                             self.title_text.setFont(QtGui.QFont("comic sans MS", 50))
@@ -535,26 +555,7 @@ class GUI(QtWidgets.QMainWindow):
                             self.backMenu.setText("BACK TO MENU")
                             self.backMenu.move(self.player.x()-400, self.player.y()+50)
                             self.scene.addWidget(self.backMenu)
-                            self.backMenu.clicked.connect(self.clickMethodBackMenu)
-
-                            # Save score
-                            i = 0
-                            for score in self.score_board:
-                                if score == None:
-                                    self.score_board[i] = [self.curr_time_m, self.curr_time_s, self.curr_time_ms]
-                                else:
-                                    print("A")
-                                    if self.curr_time_m <= score[0]:
-                                        print(score[0])
-                                        if self.curr_time_s <= score[1]:
-                                            print(score[1])
-                                            if self.curr_time_ms < score[2]:
-                                                print(score[2])
-                                                self.score_board[i] = [self.curr_time_m, self.curr_time_s, self.curr_time_ms]
-                                i += 1
-
-
-                            print(self.score_board)
+                            self.backMenu.clicked.connect(self.clickMethodBackMenu)"""
 
 
             if self.box1 in QtWidgets.QGraphicsItem.collidingItems(self.player):
@@ -587,13 +588,69 @@ class GUI(QtWidgets.QMainWindow):
                 self.collision_x = None
                 self.collision_y = None
 
+        if self.victoryFlag:
+            self.gameTimerStop()
+            # Add complete text
+            self.title_text = QtWidgets.QGraphicsTextItem("THANKS FOR PLAYING!")
+            self.title_text.setFont(QtGui.QFont("comic sans MS", 50))
+            self.title_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+            self.title_text.setPos(self.player.x()-750, self.player.y()-300)
+            self.scene.addItem(self.title_text)
+
+            # Add timer text
+            self.scene.removeItem(self.time_text)
+            self.time_text = QtWidgets.QGraphicsTextItem("Your time: {}:{}:{}".format(self.curr_time_m, self.curr_time_s, self.curr_time_ms))
+            self.time_text.setFont(QtGui.QFont("comic sans MS", 30))
+            self.time_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+            self.time_text.setPos(self.player.x(), self.player.y())
+            self.scene.addItem(self.time_text)
+
+            # Add a push button that will be used to restart the map
+            self.restart = QtWidgets.QPushButton()
+            self.restart.setGeometry(QtCore.QRect(0, 0, 280, 80))
+            self.restart.setText("RESTART")
+            self.restart.move(self.player.x()-400, self.player.y()-100)
+            self.scene.addWidget(self.restart)
+            self.restart.clicked.connect(self.clickMethodRestart)
+
+            # Add a push button that will be used to go back to main menu
+            self.backMenu = QtWidgets.QPushButton()
+            self.backMenu.setGeometry(QtCore.QRect(0, 0, 280, 80))
+            self.backMenu.setText("BACK TO MENU")
+            self.backMenu.move(self.player.x()-400, self.player.y()+50)
+            self.scene.addWidget(self.backMenu)
+            self.backMenu.clicked.connect(self.clickMethodBackMenu)
+
+            # Save score
+            i = 0
+            for score in self.score_board:
+                if None in score:
+                    self.score_board[i] = [self.curr_time_m, self.curr_time_s, self.curr_time_ms]
+                    break
+                else:
+                    print("A")
+                    print(i)
+                    print(score[0], score[1], score[2])
+                    print(self.curr_time_m)
+                    if self.curr_time_m < score[0]:
+                        self.score_board[i] = [self.curr_time_m, self.curr_time_s, self.curr_time_ms]
+                        break
+                    if self.curr_time_m == score[0]:
+                        if self.curr_time_s < score[1]:
+                            self.score_board[i] = [self.curr_time_m, self.curr_time_s, self.curr_time_ms]
+                            break
+                        elif self.curr_time_s == score[1]:
+                            if self.curr_time_ms < score[2]:
+                                self.score_board[i] = [self.curr_time_m, self.curr_time_s, self.curr_time_ms]
+                                break
+                i += 1
+            print(self.score_board)
 
         if self.death:
             # Stop game timer
             self.gameTimerStop()
             #self.curr_time_ms, self.curr_time_s, self.curr_time_m = 0, 0, 0
-            # Replenish fire balls
-            self.fire_ball_count = 2
+
             # Add game over text
             self.title_text = QtWidgets.QGraphicsTextItem("GAME OVER")
             self.title_text.setFont(QtGui.QFont("comic sans MS", 50))
@@ -633,6 +690,9 @@ class GUI(QtWidgets.QMainWindow):
         self.media_player.setVolume(30)
         self.media_player.play()
         self.death = False
+        self.victoryFlag = False
+        # Replenish fire balls
+        self.fire_ball_count = 2
         #self.scene.clear()
         self.init_player_and_NPCs()
         #self.init_world_items()
@@ -646,6 +706,9 @@ class GUI(QtWidgets.QMainWindow):
         self.media_player.setVolume(30)
         self.media_player.play()
         self.death = False
+        self.victoryFlag = False
+        # Replenish fire balls
+        self.fire_ball_count = 2
         #self.scene.clear()
         self.init_player_and_NPCs()
         #self.init_world_items()
