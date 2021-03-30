@@ -1,10 +1,12 @@
 from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
 from PyQt5.Qt import Qt
+from player import Player
 from world_textures import WorldTextures
 from npc import NPC
 from clouds import Clouds
 from fireball import FireBall
 from building_textures import BuildingTextures
+from scores import Scores
 import math
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
@@ -25,6 +27,8 @@ class GUI(QtWidgets.QMainWindow):
 
         # Delete all widgets on close
         self.setAttribute(Qt.WA_DeleteOnClose)
+        self.scores = Scores()
+        self.scores.create_save_file()
 
         # Hold the set of keys pressed
         self.keys_pressed = set()
@@ -70,7 +74,7 @@ class GUI(QtWidgets.QMainWindow):
         # Init world textures
         self.background1 = WorldTextures("backgroundTex")
         self.title_text = QtWidgets.QGraphicsTextItem("PLATFORMER Y2\n       653088")
-        self.tut_text = QtWidgets.QGraphicsTextItem("A: lEFT   D: RIGHT\nW: JUMP S: DUCK")
+        self.tut_text = QtWidgets.QGraphicsTextItem("A: lEFT   D: RIGHT\nW: JUMP S: DUCK\nE: FIREBALL F: USE")
         self.wasd = WorldTextures("wasd")
         self.start_button = QtWidgets.QPushButton()
         self.quit_button = QtWidgets.QPushButton()
@@ -95,6 +99,9 @@ class GUI(QtWidgets.QMainWindow):
         self.death = False
         self.collision_x = None
         self.collision_y = None
+
+        # Collision
+        #self.collision_list_box = [self.box1, self.box2]
 
     def init_window(self):
         # Initiate a window
@@ -141,7 +148,9 @@ class GUI(QtWidgets.QMainWindow):
 
         # Call the function for drawing the map and adding the player
         #self.draw_map()
-        self.display_main_menu()
+
+        #self.display_main_menu()
+        self.display_name_menu()
 
         # Draw the scene by QGraphicsView
         self.view = QtWidgets.QGraphicsView(self.scene, self)
@@ -153,6 +162,45 @@ class GUI(QtWidgets.QMainWindow):
         self.view.setSceneRect(0, 0, SCENE_WIDTH, SCREEN_HEIGHT)
         self.view.centerOn(self.player.x(), self.player.y())
         #self.view.centerOn(self.play_button.x(), self.play_button.y())
+
+    def display_name_menu(self):
+        """# Add label
+        self.nameLable = QtWidgets.QLabel()
+        self.nameLable.setText("Write your name in the other window and close it.")
+        self.nameLable.setFont(QtGui.QFont("comic sans MS", 20))
+        self.nameLable.move(SCREEN_WIDTH/2-200, SCREEN_HEIGHT/2-5)
+        self.nameLable.resize(200, 32)
+        self.scene.addWidget(self.nameLable)"""
+        background_size = 256
+        bg_tiles_x = math.ceil(SCREEN_WIDTH/background_size)
+        bg_tiles_y = math.ceil(SCREEN_HEIGHT/background_size)
+        for x in range(bg_tiles_x):
+            for y in range(bg_tiles_y):
+                self.background1 = WorldTextures("backgroundTex")
+                self.background1.setPos((0+x*background_size), (0+y*background_size))
+                self.scene.addItem(self.background1)
+
+        # Add text for the name menu
+        self.nameLabel = QtWidgets.QGraphicsTextItem("Write your name in the other window\n                    and close it.")
+        self.nameLabel.setFont(QtGui.QFont("comic sans MS", 30))
+        self.nameLabel.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+        self.nameLabel.setPos((SCREEN_WIDTH/2)-(self.nameLabel.boundingRect().width()/2), 200)
+        self.scene.addItem(self.nameLabel)
+
+        # Add line edit to write the name of the player
+        self.line = QtWidgets.QLineEdit()
+        self.line.move(SCREEN_WIDTH/2-100, SCREEN_HEIGHT/2)
+        self.line.resize(200, 32)
+        self.line.show()
+        #self.scene.addWidget(self.line)
+
+        # Add ok button to go to the main menu
+        self.pybutton = QtWidgets.QPushButton('OK')
+        self.pybutton.clicked.connect(self.clickMethodToMenu)
+        self.pybutton.resize(200, 32)
+        self.pybutton.move(SCREEN_WIDTH/2-100, SCREEN_HEIGHT/2+50)
+        self.pybutton.resize(200,32)
+        self.scene.addWidget(self.pybutton)
 
     def display_main_menu(self):
         # Draw a background for the menu
@@ -187,7 +235,7 @@ class GUI(QtWidgets.QMainWindow):
         self.scene.addItem(self.title_text)
 
         # Add instruction text on the menu
-        self.tut_text = QtWidgets.QGraphicsTextItem("A: lEFT   D: RIGHT\nW: JUMP S: DUCK")
+        self.tut_text = QtWidgets.QGraphicsTextItem("A: lEFT   D: RIGHT\nW: JUMP S: DUCK\nE: FIREBALL F: USE")
         self.tut_text.setFont(QtGui.QFont("comic sans", 20))
         self.tut_text.setDefaultTextColor(QtGui.QColor(0, 0, 0))
         self.tut_text.setPos(35, 570)
@@ -244,6 +292,8 @@ class GUI(QtWidgets.QMainWindow):
         self.score_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
         if None not in self.score_board[0]:
             self.scene.addItem(self.score_text)
+
+
 
 
     def draw_map(self):
@@ -439,7 +489,7 @@ class GUI(QtWidgets.QMainWindow):
 
     def game_update(self):
         # Update the class Player game_update function
-        self.player.game_update(self.keys_pressed, self.collision_x, self.collision_y)
+        self.player.game_update(self.keys_pressed, self.collision_x, self.collision_y, self.line.text())
         # If E key is pressed create fireball
         if Qt.Key_E in self.keys_pressed:
             # Check that player has fire balls left
@@ -726,6 +776,10 @@ class GUI(QtWidgets.QMainWindow):
         # Exit the game
         QtWidgets.QApplication.quit()
 
+    def clickMethodToMenu(self):
+        # Display main menu
+        self.display_main_menu()
+
 
     def ghost_menu_movement(self):
         # Algo for the menu ghost to move
@@ -770,7 +824,7 @@ class GUI(QtWidgets.QMainWindow):
 
 
 
-player_speed = 6
+"""player_speed = 6
 
 class Player(QGraphicsPixmapItem):
 
@@ -778,9 +832,9 @@ class Player(QGraphicsPixmapItem):
     # makes the player jump and duck
 
     def __init__(self, parent = None):
-        """self.name = name
+        self.name = name
         self.score = 0
-        self.savedScore = []"""
+        self.savedScore = []
 
         # Initiate the Pixmap graphics item
         QGraphicsPixmapItem.__init__(self, parent)
@@ -872,8 +926,8 @@ class Player(QGraphicsPixmapItem):
 
         # Update the position of the player in x and y axis.
         self.setPos(self.x()+dx, self.y()+dy)
-        """if self.c_y != "U" and self.y() < 428:
-            self.setPos(self.x(), 568)"""
+        if self.c_y != "U" and self.y() < 428:
+            self.setPos(self.x(), 568)
 
 
     def player_death(self):
@@ -905,7 +959,7 @@ class Player(QGraphicsPixmapItem):
             # and become negative while coming down
             self.jump_speed = self.jump_speed - 1
 
-            """if self.c_y == "U":
+            if self.c_y == "U":
                 # making jump equal to false
                 self.jumpFlag = False
 
@@ -914,7 +968,7 @@ class Player(QGraphicsPixmapItem):
                 self.jump_speed = 7
                 self.mass = 1
                 # Switch back to stand pixmap image
-                self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))"""
+                self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
 
             # object reached its maximum height
             if self.jump_speed < 0:
@@ -949,4 +1003,4 @@ class Player(QGraphicsPixmapItem):
                 self.setPos(self.x(), self.y()-20)
                 self.duckFlag = False
                 self.duck_time = 15
-                self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))
+                self.setPixmap(QPixmap("PlayerTextures/p1_stand.png"))"""
