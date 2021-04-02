@@ -1,5 +1,6 @@
 import sys
 from gui import GUI
+from scores import Scores
 from PyQt5 import (QtWidgets, QtMultimedia, QtCore)
 
 def main():

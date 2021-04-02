@@ -27,8 +27,10 @@ class GUI(QtWidgets.QMainWindow):
 
         # Delete all widgets on close
         self.setAttribute(Qt.WA_DeleteOnClose)
+
+        # Initiate score file
         self.scores = Scores()
-        self.scores.create_save_file()
+        self.save_file_name = self.scores.create_save_file()
 
         # Hold the set of keys pressed
         self.keys_pressed = set()
@@ -51,6 +53,7 @@ class GUI(QtWidgets.QMainWindow):
 
         # Initiate player and NPCs and fire ball and key
         self.player = Player()
+        self.player_name = QtWidgets.QGraphicsTextItem("")
         self.key = WorldTextures("key")
         self.keyFlag = False
         self.fire_ball_count = 2
@@ -412,7 +415,7 @@ class GUI(QtWidgets.QMainWindow):
         self.scene.addItem(self.box2)
 
 
-        # Add NPC ghost 1
+        """# Add NPC ghost 1
         self.ghost.setPos(1000, 590)
         self.scene.addItem(self.ghost)
         self.ghost.start_pos()
@@ -435,7 +438,7 @@ class GUI(QtWidgets.QMainWindow):
         # Add NPC frog
         self.frog1.setPos(2000, 621)
         self.scene.addItem(self.frog1)
-        self.frog1.start_pos()
+        self.frog1.start_pos()"""
 
         # Add NPC snakeSlime
         self.snakeSlime.setPos(3000, GROUND_LEVEL-self.snakeSlime.boundingRect().height())
@@ -461,6 +464,12 @@ class GUI(QtWidgets.QMainWindow):
         self.fireball_hud1.setPos(10, 20), self.fireball_hud2.setPos(65, 20)
         self.scene.addItem(self.fireball_hud1), self.scene.addItem(self.fireball_hud2)
 
+        # Add player name
+        self.player_name = QtWidgets.QGraphicsTextItem(self.line.text())
+        self.player_name.setFont(QtGui.QFont("comic sans MS", 20))
+        self.player_name.setDefaultTextColor(QtGui.QColor(255, 0, 0))
+        self.player_name.setPos(self.player.x()-(self.player_name.boundingRect().width()/2+30), self.player.y()-50)
+        self.scene.addItem(self.player_name)
 
 
     def keyPressEvent(self, event):
@@ -486,6 +495,8 @@ class GUI(QtWidgets.QMainWindow):
             self.time_text.setPos(5000-100-self.time_text.boundingRect().width(), 30)
         self.fireball_hud1.setPos(self.player.x()-450, 5), self.fireball_hud2.setPos(self.player.x()-390, 5)
         self.key_hud.setPos(self.player.x()-350, 5)
+        # Make player name follow players position
+        self.player_name.setPos(self.player.x()-(self.player_name.boundingRect().width()/2)+40, self.player.y()-65)
 
     def game_update(self):
         # Update the class Player game_update function
@@ -671,6 +682,7 @@ class GUI(QtWidgets.QMainWindow):
             self.backMenu.clicked.connect(self.clickMethodBackMenu)
 
             # Save score
+            self.scores.save_to_file(self.line.text(), self.curr_time_m, self.curr_time_s, self.curr_time_ms)
             i = 0
             for score in self.score_board:
                 if None in score:

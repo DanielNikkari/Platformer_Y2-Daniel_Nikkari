@@ -14,10 +14,14 @@ class Scores():
         time = self.curtime.currentTime()
         timeString = time.toString()
         timeParsed = timeString.replace(':', ',')
-        self.f = open("game_scores_date{}_time{}".format(date.toString(), timeParsed), "w+")
+        self.f = open("game_scores_date{}_time{}.txt".format(date.toString(), timeParsed), "w+")
+        return "game_scores_date{}_time{}.txt".format(date.toString(), timeParsed)
 
     def open_save_file(self, filename):
        self.f = open(filename, "w+")
 
-    def save_to_file(self, minutes, seconds, mseconds):
-        self.f.write("{},{},{}".format(minutes, seconds, mseconds))
+    def save_to_file(self, player_name, minutes, seconds, mseconds):
+        self.f.write("{},{},{},{}\n".format(player_name, minutes, seconds, mseconds))
+
+    def close_file(self, filename):
+        filename.close()
