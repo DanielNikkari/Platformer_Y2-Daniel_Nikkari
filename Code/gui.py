@@ -197,6 +197,7 @@ class GUI(QtWidgets.QMainWindow):
         self.line.show()
         #self.scene.addWidget(self.line)
 
+
         # Add ok button to go to the main menu
         self.pybutton = QtWidgets.QPushButton('OK')
         self.pybutton.clicked.connect(self.clickMethodToMenu)
@@ -295,8 +296,6 @@ class GUI(QtWidgets.QMainWindow):
         self.score_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
         if None not in self.score_board[0]:
             self.scene.addItem(self.score_text)
-
-
 
 
     def draw_map(self):

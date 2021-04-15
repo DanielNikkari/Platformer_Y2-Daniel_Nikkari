@@ -8,8 +8,8 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     gui = GUI()
     playlist = QtMultimedia.QMediaPlaylist()
-    #url = QtCore.QUrl.fromLocalFile("Audio/Music/bg_lofiBeat.mp3")
-    url = QtCore.QUrl.fromLocalFile("Audio/Music/Red_Alert_cut.mp3")
+    url = QtCore.QUrl.fromLocalFile("Audio/Music/bg_lofiBeat.mp3")
+    #url = QtCore.QUrl.fromLocalFile("Audio/Music/Red_Alert_cut.mp3")
     playlist.addMedia(QtMultimedia.QMediaContent(url))
     playlist.setPlaybackMode(QtMultimedia.QMediaPlaylist.Loop)
 
