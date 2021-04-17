@@ -837,7 +837,14 @@ class GUI(QtWidgets.QMainWindow):
         self.scene.addItem(self.time_text)
 
     def closeEvent(self, event):
-        self.scores.close_file()
+        reply = QtWidgets.QMessageBox.question(self, 'Game Close', 'Are you sure you want to quit the game?',
+                                               QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+        if reply == QtWidgets.QMessageBox.Yes:
+            event.accept()
+            self.scores.close_file()
+        else:
+            event.ignore()
+
 
 
 
