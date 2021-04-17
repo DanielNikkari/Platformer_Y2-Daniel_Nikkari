@@ -26,6 +26,6 @@ class Scores():
         # Write the core to the save file
         self.f.write("{},{},{},{}\n".format(player_name, minutes, seconds, mseconds))
 
-    def close_file(self, filename):
+    def close_file(self):
         # Close the save file
-        filename.close()
+        self.f.close()

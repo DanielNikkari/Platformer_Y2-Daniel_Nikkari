@@ -282,7 +282,7 @@ class GUI(QtWidgets.QMainWindow):
 
         # Add score board
 
-        self.score_text = QtWidgets.QGraphicsTextItem("Top 5:\n1st:{}m {}s {}ms\n2nd:{}m {}s {}ms\n3rd:{}m {}s {}ms\n4th:{}m {}s {}ms"
+        '''self.score_text = QtWidgets.QGraphicsTextItem("Top 5:\n1st:{}m {}s {}ms\n2nd:{}m {}s {}ms\n3rd:{}m {}s {}ms\n4th:{}m {}s {}ms"
                                                       "\n5th:{}m {}s {}ms\n".format(self.score_board[0][0],
                                                                                     self.score_board[0][1], self.score_board[0][2],
                                                                                     self.score_board[1][0], self.score_board[1][1],
@@ -290,8 +290,10 @@ class GUI(QtWidgets.QMainWindow):
                                                                                     self.score_board[2][1], self.score_board[2][2],
                                                                                     self.score_board[3][0], self.score_board[3][1],
                                                                                     self.score_board[3][2], self.score_board[4][0],
-                                                                                    self.score_board[4][1], self.score_board[4][2]))
-        self.score_text.setPos(SCREEN_WIDTH-self.score_text.boundingRect().width()-150, 350)
+                                                                                    self.score_board[4][1], self.score_board[4][2]))'''
+        self.score_text = QtWidgets.QGraphicsTextItem("TOP SCORE:\n{}\n{}m {}s {}ms\n".format(self.line.text(), self.score_board[0][0],
+                                                                                    self.score_board[0][1], self.score_board[0][2]))
+        self.score_text.setPos(SCREEN_WIDTH-self.score_text.boundingRect().width()-180, 350)
         self.score_text.setFont(QtGui.QFont("comic sans", 20))
         self.score_text.setDefaultTextColor(QtGui.QColor(255, 0, 0))
         if None not in self.score_board[0]:
@@ -785,6 +787,7 @@ class GUI(QtWidgets.QMainWindow):
 
     def clickMethodQuit(self):
         # Exit the game
+        self.scores.close_file()
         QtWidgets.QApplication.quit()
 
     def clickMethodToMenu(self):
@@ -832,6 +835,9 @@ class GUI(QtWidgets.QMainWindow):
         else:
             self.time_text.setPos(SCENE_WIDTH-self.time_text.boundingRect().width(), y_pos)
         self.scene.addItem(self.time_text)
+
+    def closeEvent(self, event):
+        self.scores.close_file()
 
 
 
