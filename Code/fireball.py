@@ -1,9 +1,10 @@
-from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
-from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
 
+
 class FireBall(QGraphicsPixmapItem):
+
+    # Create fireball and move it
 
     def __init__(self, parent=None):
         QGraphicsPixmapItem.__init__(self, parent)

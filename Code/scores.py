@@ -1,13 +1,14 @@
-from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
+from PyQt5 import QtCore
 
-class Scores():
+
+class Scores:
+
     # Create and save to a file
 
     def __init__(self):
         # Initiate save file
         self.datetime = QtCore.QDate
         self.curtime = QtCore.QTime
-        self.top_5 = []
 
     def create_save_file(self):
         # Create the file into folder SavedScores

@@ -1,5 +1,3 @@
-from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
-from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
 
@@ -8,7 +6,6 @@ class NPC(QGraphicsPixmapItem):
     # NPC ghost class that initiates ghost graphics and processes movement algorithm.
 
     def __init__(self, NPC_name, parent = None):
-
         # Initiate the Pixmap graphics item
         QGraphicsPixmapItem.__init__(self, parent)
         # Set a Pixmap dictionary for the graphics items of the NPCs
@@ -149,5 +146,6 @@ class NPC(QGraphicsPixmapItem):
             self.setPixmap(pic2)
 
     def game_update_snakeSlime(self):
+        # Make snake slime move
         pic = self.sprite_snakeSlime()
         self.setPixmap(pic)

@@ -1,10 +1,11 @@
-from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
+from PyQt5 import (QtCore, Qt, QtMultimedia)
 from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
 
 player_speed = 6
 SCENE_WIDTH = 5000
+
 
 class Player(QGraphicsPixmapItem):
 
@@ -13,8 +14,6 @@ class Player(QGraphicsPixmapItem):
 
     def __init__(self, parent = None):
         self.name = ""
-        """self.score = 0
-        self.savedScore = []"""
 
         # Initiate the Pixmap graphics item
         QGraphicsPixmapItem.__init__(self, parent)

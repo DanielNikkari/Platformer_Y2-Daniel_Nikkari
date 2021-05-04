@@ -1,6 +1,5 @@
 import sys
 from gui import GUI
-from scores import Scores
 from PyQt5 import (QtWidgets, QtMultimedia, QtCore)
 
 def main():
@@ -9,7 +8,6 @@ def main():
     gui = GUI()
     playlist = QtMultimedia.QMediaPlaylist()
     url = QtCore.QUrl.fromLocalFile("Audio/Music/bg_lofiBeat.mp3")
-    #url = QtCore.QUrl.fromLocalFile("Audio/Music/Red_Alert_cut.mp3")
     playlist.addMedia(QtMultimedia.QMediaContent(url))
     playlist.setPlaybackMode(QtMultimedia.QMediaPlaylist.Loop)
 
