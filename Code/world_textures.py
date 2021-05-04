@@ -1,10 +1,10 @@
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsPixmapItem
-from PyQt5 import QtWidgets, QtGui, QtCore
+
 
 class WorldTextures(QGraphicsPixmapItem):
 
-    #Class that holds the textures needed for the platformer world
+    # Class that holds the textures needed for the platformer world
 
     def __init__(self, texture, parent = None):
         QGraphicsPixmapItem.__init__(self, parent)
@@ -20,7 +20,8 @@ class WorldTextures(QGraphicsPixmapItem):
                               "box": QPixmap("Textures/Obstacle_Textures/box.png"),
                               "bush": QPixmap("Textures/bg/bush.png"),
                               "cloud1": QPixmap("Textures/bg/cloud1.png"),
-                              "cloud2": QPixmap("Textures/bg/cloud2.png")}
+                              "cloud2": QPixmap("Textures/bg/cloud2.png"),
+                              "key": QPixmap("PlayerTextures/Items/keyYellow.png")}
         # Pick the wanted texture from the dictionary
         wanted_texture = self.worldTextures[texture]
         self.setPixmap(wanted_texture)

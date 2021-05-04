@@ -1,5 +1,3 @@
-from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
-from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
 
@@ -8,13 +6,13 @@ class NPC(QGraphicsPixmapItem):
     # NPC ghost class that initiates ghost graphics and processes movement algorithm.
 
     def __init__(self, NPC_name, parent = None):
-
         # Initiate the Pixmap graphics item
         QGraphicsPixmapItem.__init__(self, parent)
         # Set a Pixmap dictionary for the graphics items of the NPCs
         self.NPCs = {"ghost": QPixmap("Textures/NPC_Textures/ghost.png"),
                      "bee": QPixmap("Textures/NPC_Textures/Bee/bee.png"),
-                     "frog": QPixmap("Textures/NPC_Textures/Frog/frog.png")}
+                     "frog": QPixmap("Textures/NPC_Textures/Frog/frog.png"),
+                     "snakeSlime": QPixmap("Textures/NPC_Textures/snakeSlime/snakeSlime.png")}
         # Pick the NPC with the key NPC_name
         wantedNPC = self.NPCs[NPC_name]
         self.setPixmap(wantedNPC)
@@ -37,6 +35,13 @@ class NPC(QGraphicsPixmapItem):
         self.current_frog_sprite = 0
         self.frog_image = self.frog_sprites[self.current_frog_sprite]
         self.frogDeadFlag = False
+
+        # Snakeslime sprite
+        self.snakeslime_sprite = []
+        self.snakeslime_sprite.append(QPixmap("Textures/NPC_Textures/snakeSlime/snakeSlime_ani.png"))
+        self.snakeslime_sprite.append(QPixmap("Textures/NPC_Textures/snakeSlime/snakeSlime.png"))
+        self.current_snakeslime_sprite = 0
+        self.snakeslime_image = self.snakeslime_sprite[self.current_snakeslime_sprite]
 
     def start_pos(self):
         # Get the ghosts start x pos to anchor the ghosts movement around it.
@@ -66,6 +71,15 @@ class NPC(QGraphicsPixmapItem):
         if self.frog_image == self.frog_sprites[0]:
             self.setPos(self.x(), self.start_y)
         return self.frog_image
+
+    def sprite_snakeSlime(self):
+        # Produce the snakeslime wobble using sprite animation.
+        # Slow down the animation by adding only 0.5
+        self.current_snakeslime_sprite += 0.1
+        if int(self.current_snakeslime_sprite) >= len(self.snakeslime_sprite):
+            self.current_snakeslime_sprite = 0
+        self.snakeslime_image = self.snakeslime_sprite[int(self.current_snakeslime_sprite)]
+        return self.snakeslime_image
 
     def game_update_ghost(self):
         # Make ghost move back and forth
@@ -131,4 +145,7 @@ class NPC(QGraphicsPixmapItem):
             pic2 = self.sprite_frog()
             self.setPixmap(pic2)
 
-
+    def game_update_snakeSlime(self):
+        # Make snake slime move
+        pic = self.sprite_snakeSlime()
+        self.setPixmap(pic)

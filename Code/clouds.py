@@ -1,9 +1,10 @@
-from PyQt5 import (QtWidgets, QtCore, QtGui, Qt, QtMultimedia)
-from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap
 
+
 class Clouds(QGraphicsPixmapItem):
+
+    # Create clouds
 
     def __init__(self, cloudTex, parent=None):
         QGraphicsPixmapItem.__init__(self, parent)

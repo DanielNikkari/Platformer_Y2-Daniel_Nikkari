@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsPixmapItem
-from PyQt5 import QtWidgets, QtGui, QtCore
+
 
 class BuildingTextures(QGraphicsPixmapItem):
 
