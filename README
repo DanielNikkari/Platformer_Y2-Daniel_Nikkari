@@ -2,20 +2,10 @@ PLATFORMER GAME PROJECT CS-A1121 Y2
 DANIEL NIKKARI, 653088
 
 1. 
-The game so far has a working gui, it's ran from main.py. In the game first
-appears a menu screen which has two buttons start and quit. Start button initiates
-the map and adds players and npcs to the scene. Quit button quits the application.
-In the game player can move their character by pressing w, a, s and d keys.
-A is left, D is right, W is jump, S is duck. In the game there are NPCs
-(non-player characters). Players mission is to get through these NPCs without
-touching them, if player touches an NPC then he will die and game will pause
-and give options to either restart the game or go back to menu. Frog NPC
-differs to other NPCs in a way that player can jump on it to kill the frog NPC.
-The game has a basic set of audio, it has it's theme music playing on loop,
-it has an jumping sound effect and click sound effect, in addition it has a
-player death sound effect. The game does not have a completed map or a working 
-nor score taking or keeping. The game can be ran, however, the loading of the
-map will take a lot of time, depending on the speed of the computer.
+The respitory includes folders code and documents. Inside the code folder is
+the code for the program itself and the required files in their respective
+subfolders. Inside the documents folder can be found the project documentation
+(in Finnish) and the project plan (in Finnish). 
 
 2. 
 You can run the program. 
