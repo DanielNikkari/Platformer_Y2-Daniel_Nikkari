@@ -26,5 +26,5 @@ git clone https://version.aalto.fi/gitlab/nikkard1/platformer_y2_2021-daniel_nik
 3. How to use
 
 The program is executed from main.py. To run the program use python 3
-compiler and compile main.py file. Make sure that all the required
+compiler and interpret main.py file. Make sure that all the required
 texture and audio files are downloaded with the program.
